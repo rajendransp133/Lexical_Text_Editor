@@ -28,6 +28,8 @@ import useModal from "../hooks/useModel";
 
 import BlockOptionsDropdownList from "./BlockOptionsDropdownList";
 import { InsertImageDialog } from "./ImagePlugin";
+import { InsertEquationDialog } from "./EquationPlugin";
+
 function Divider() {
   return <div className="divider" />;
 }
@@ -300,6 +302,19 @@ export default function ToolbarPlugin() {
           aria-label="Insert Image"
         >
           <i className="format image" />
+        </button>
+        <button
+          onClick={() => {
+            showModal("Insert Equation", (onClose) => (
+              <InsertEquationDialog
+                activeEditor={activeEditor}
+                onClose={onClose}
+              />
+            ));
+          }}
+          className="toolbar-item spaced"
+        >
+          <i className="icon equation" />
         </button>
       </div>
     </>

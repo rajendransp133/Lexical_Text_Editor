@@ -27,6 +27,8 @@ import { ListItemNode } from "@lexical/list";
 import { QuoteNode } from "@lexical/rich-text";
 import { ImageNode } from "./nodes/ImageNode";
 import ImagesPlugin from "./Plugins/ImagePlugin";
+import { EquationNode } from "./nodes/EquationNode";
+import EquationsPlugin from "./Plugins/EquationPlugin";
 
 const placeholder = "Enter some rich text...";
 
@@ -137,6 +139,7 @@ const editorConfig = {
     ListItemNode,
     QuoteNode,
     ImageNode,
+    EquationNode,
   ],
   onError(error: Error) {
     throw error;
@@ -169,6 +172,7 @@ function App() {
               <AutoFocusPlugin />
               <ListPlugin />
               <ImagesPlugin />
+              <EquationsPlugin />
             </div>
           </div>
         </LexicalComposer>

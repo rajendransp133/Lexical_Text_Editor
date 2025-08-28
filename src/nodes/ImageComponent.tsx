@@ -28,7 +28,7 @@ import {
 } from "lexical";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 
-import brokenImage from "../../public/icons/image-broken.svg";
+import brokenImage from "/icons/image-broken.svg";
 import ImageResizer from "../ui/ImageResizer";
 import { $isImageNode } from "./ImageNode";
 
