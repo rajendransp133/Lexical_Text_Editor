@@ -1,12 +1,10 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
+import { createPortal } from "react-dom";
+
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { mergeRegister } from "@lexical/utils";
+import { $getNearestNodeOfType, mergeRegister } from "@lexical/utils";
+
+import { $isAtNodeEnd } from "@lexical/selection";
+
 import {
   $getSelection,
   $isRangeSelection,
@@ -18,40 +16,110 @@ import {
   REDO_COMMAND,
   SELECTION_CHANGE_COMMAND,
   UNDO_COMMAND,
+  type RangeSelection,
 } from "lexical";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { $isListNode, ListNode } from "@lexical/list";
+
+import { $isHeadingNode } from "@lexical/rich-text";
+
+import BlockOptionsDropdownList from "./BlockOptionsDropdownList";
 function Divider() {
   return <div className="divider" />;
 }
 
+const supportedBlockTypes = new Set([
+  "paragraph",
+  "quote",
+  "h1",
+  "h2",
+  "ul",
+  "ol",
+]);
+
+const blockTypeToBlockName = {
+  h1: "Large Heading",
+  h2: "Small Heading",
+  ol: "Numbered List",
+  paragraph: "Normal",
+  quote: "Quote",
+  ul: "Bulleted List",
+};
+
 export default function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
-  const toolbarRef = useRef(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
   const [isStrikethrough, setIsStrikethrough] = useState(false);
+  const [blockType, setBlockType] = useState("paragraph");
+  const [showBlockOptionsDropDown, setShowBlockOptionsDropDown] =
+    useState(false);
+  const [selectedElementKey, setSelectedElementKey] = useState<string | null>(
+    null
+  );
 
-  const $updateToolbar = useCallback(() => {
+  const updateToolbar = useCallback(() => {
     const selection = $getSelection();
     if ($isRangeSelection(selection)) {
+      const anchorNode = selection.anchor.getNode();
+      const element =
+        anchorNode.getKey() === "root"
+          ? anchorNode
+          : anchorNode.getTopLevelElementOrThrow();
+      const elementKey = element.getKey();
+      const elementDOM = editor.getElementByKey(elementKey);
+      if (elementDOM !== null) {
+        setSelectedElementKey(elementKey);
+        if ($isListNode(element)) {
+          const parentList = $getNearestNodeOfType(anchorNode, ListNode);
+          const type = parentList ? parentList.getTag() : element.getTag();
+          setBlockType(type);
+        } else {
+          const type = $isHeadingNode(element)
+            ? element.getTag()
+            : element.getType();
+          setBlockType(type);
+        }
+      }
       // Update text format
       setIsBold(selection.hasFormat("bold"));
       setIsItalic(selection.hasFormat("italic"));
       setIsUnderline(selection.hasFormat("underline"));
       setIsStrikethrough(selection.hasFormat("strikethrough"));
+
+      // Update links
+      const node = getSelectedNode(selection);
+      const parent = node.getParent();
     }
-  }, []);
+  }, [editor]);
+
+  function getSelectedNode(selection: RangeSelection) {
+    const anchor = selection.anchor;
+    const focus = selection.focus;
+    const anchorNode = selection.anchor.getNode();
+    const focusNode = selection.focus.getNode();
+    if (anchorNode === focusNode) {
+      return anchorNode;
+    }
+    const isBackward = selection.isBackward();
+    if (isBackward) {
+      return $isAtNodeEnd(focus) ? anchorNode : focusNode;
+    } else {
+      return $isAtNodeEnd(anchor) ? focusNode : anchorNode;
+    }
+  }
 
   useEffect(() => {
     return mergeRegister(
       editor.registerUpdateListener(({ editorState }) => {
         editorState.read(
           () => {
-            $updateToolbar();
+            updateToolbar();
           },
           { editor }
         );
@@ -59,7 +127,7 @@ export default function ToolbarPlugin() {
       editor.registerCommand(
         SELECTION_CHANGE_COMMAND,
         (_payload, _newEditor) => {
-          $updateToolbar();
+          updateToolbar();
           return false;
         },
         COMMAND_PRIORITY_LOW
@@ -81,7 +149,7 @@ export default function ToolbarPlugin() {
         COMMAND_PRIORITY_LOW
       )
     );
-  }, [editor, $updateToolbar]);
+  }, [editor, updateToolbar]);
 
   return (
     <div className="toolbar" ref={toolbarRef}>
@@ -106,6 +174,38 @@ export default function ToolbarPlugin() {
         <i className="format redo" />
       </button>
       <Divider />
+      {supportedBlockTypes.has(blockType) && (
+        <>
+          <button
+            className="toolbar-item block-controls"
+            onClick={() =>
+              setShowBlockOptionsDropDown(!showBlockOptionsDropDown)
+            }
+            aria-label="Formatting Options"
+          >
+            <span className={"icon block-type " + blockType} />
+            <span className="text">
+              {
+                blockTypeToBlockName[
+                  blockType as keyof typeof blockTypeToBlockName
+                ]
+              }
+            </span>
+            <i className="chevron-down" />
+          </button>
+          {showBlockOptionsDropDown &&
+            createPortal(
+              <BlockOptionsDropdownList
+                editor={editor}
+                blockType={blockType}
+                toolbarRef={toolbarRef}
+                setShowBlockOptionsDropDown={setShowBlockOptionsDropDown}
+              />,
+              document.body
+            )}
+          <Divider />
+        </>
+      )}
       <button
         onClick={() => {
           editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold");

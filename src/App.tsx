@@ -20,6 +20,11 @@ import {
 import ExampleTheme from "./ExampleTheme";
 import ToolbarPlugin from "./Plugins/ToolbarPlugin";
 import { parseAllowedColor, parseAllowedFontSize } from "./styleConfig";
+import { ListPlugin } from "@lexical/react/LexicalListPlugin";
+import { HeadingNode } from "@lexical/rich-text";
+import { ListNode } from "@lexical/list";
+import { ListItemNode } from "@lexical/list";
+import { QuoteNode } from "@lexical/rich-text";
 
 const placeholder = "Enter some rich text...";
 
@@ -122,7 +127,14 @@ const editorConfig = {
     import: constructImportMap(),
   },
   namespace: "React.js Demo",
-  nodes: [ParagraphNode, TextNode],
+  nodes: [
+    ParagraphNode,
+    TextNode,
+    HeadingNode,
+    ListNode,
+    ListItemNode,
+    QuoteNode,
+  ],
   onError(error: Error) {
     throw error;
   },
@@ -151,6 +163,7 @@ function App() {
             />
             <HistoryPlugin />
             <AutoFocusPlugin />
+            <ListPlugin />
           </div>
         </div>
       </LexicalComposer>
