@@ -24,7 +24,10 @@ import { $isListNode, ListNode } from "@lexical/list";
 
 import { $isHeadingNode } from "@lexical/rich-text";
 
+import useModal from "../hooks/useModel";
+
 import BlockOptionsDropdownList from "./BlockOptionsDropdownList";
+import { InsertImageDialog } from "./ImagePlugin";
 function Divider() {
   return <div className="divider" />;
 }
@@ -62,6 +65,8 @@ export default function ToolbarPlugin() {
   const [selectedElementKey, setSelectedElementKey] = useState<string | null>(
     null
   );
+  const [model, showModal] = useModal();
+  const [activeEditor, setActiveEditor] = useState(editor);
 
   const updateToolbar = useCallback(() => {
     const selection = $getSelection();
@@ -278,7 +283,19 @@ export default function ToolbarPlugin() {
         aria-label="Justify Align"
       >
         <i className="format justify-align" />
-      </button>{" "}
+      </button>
+      <Divider />
+      <button
+        onClick={() =>
+          showModal("Insert Image", (onClose: () => void) => (
+            <InsertImageDialog activeEditor={activeEditor} onClose={onClose} />
+          ))
+        }
+        className="item"
+      >
+        <i className="icon image" />
+        <span className="text">Image</span>
+      </button>
     </div>
   );
 }
