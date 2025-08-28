@@ -149,7 +149,7 @@ const editorConfig = {
 
 function App() {
   return (
-    <div className="max-w-4xl mx-auto px-8 my-16 ">
+    <div className="max-w-3xl mx-auto px-8 my-16 ">
       <h1>React.js Rich Text Lexical Example</h1>
       <div className="editor-shell">
         <LexicalComposer initialConfig={editorConfig}>

@@ -87,7 +87,7 @@ h1 {
 .editor-container {
   margin: 20px auto 20px auto;
   border-radius: 2px;
-  max-width: 600px;
+  max-width: 700px;
   color: #000;
   position: relative;
   line-height: 20px;
@@ -407,6 +407,16 @@ pre::-webkit-scrollbar-thumb {
   background-size: contain;
 }
 
+.toolbar .toolbar-item i:not(.chevron-down) {
+  display: flex;
+  width: 20px;
+  height: 20px;
+  user-select: none;
+  margin-right: 8px;
+  line-height: 16px;
+  background-size: contain;
+}
+
 .toolbar i.chevron-down {
   margin-top: 3px;
   width: 16px;
@@ -535,6 +545,16 @@ i.chevron-down {
 }
 
 .dropdown .item .icon {
+  display: flex;
+  width: 20px;
+  height: 20px;
+  user-select: none;
+  margin-right: 12px;
+  line-height: 16px;
+  background-size: contain;
+}
+
+.dropdown .item i {
   display: flex;
   width: 20px;
   height: 20px;

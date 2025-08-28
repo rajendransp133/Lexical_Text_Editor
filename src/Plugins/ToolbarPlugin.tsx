@@ -3,20 +3,16 @@ import { createPortal } from "react-dom";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $getNearestNodeOfType, mergeRegister } from "@lexical/utils";
 
-import { $isAtNodeEnd } from "@lexical/selection";
-
 import {
   $getSelection,
   $isRangeSelection,
   CAN_REDO_COMMAND,
   CAN_UNDO_COMMAND,
   COMMAND_PRIORITY_LOW,
-  FORMAT_ELEMENT_COMMAND,
   FORMAT_TEXT_COMMAND,
   REDO_COMMAND,
   SELECTION_CHANGE_COMMAND,
   UNDO_COMMAND,
-  type RangeSelection,
 } from "lexical";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -27,6 +23,7 @@ import { $isHeadingNode } from "@lexical/rich-text";
 import useModal from "../hooks/useModel";
 
 import BlockOptionsDropdownList from "./BlockOptionsDropdownList";
+import AlignmentOptionsDropdownList from "./AlignmentOptionsDropdownList";
 import { InsertImageDialog } from "./ImagePlugin";
 import { InsertEquationDialog } from "./EquationPlugin";
 
@@ -52,6 +49,13 @@ const blockTypeToBlockName = {
   ul: "Bulleted List",
 };
 
+const alignmentTypeToAlignmentName = {
+  left: "Left Align",
+  center: "Center Align",
+  right: "Right Align",
+  justify: "Justify Align",
+};
+
 export default function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
   const toolbarRef = useRef<HTMLDivElement>(null);
@@ -64,11 +68,11 @@ export default function ToolbarPlugin() {
   const [blockType, setBlockType] = useState("paragraph");
   const [showBlockOptionsDropDown, setShowBlockOptionsDropDown] =
     useState(false);
-  const [selectedElementKey, setSelectedElementKey] = useState<string | null>(
-    null
-  );
+  const [alignmentType, setAlignmentType] = useState("left");
+  const [showAlignmentOptionsDropDown, setShowAlignmentOptionsDropDown] =
+    useState(false);
   const [model, showModal] = useModal();
-  const [activeEditor, setActiveEditor] = useState(editor);
+  const [activeEditor] = useState(editor);
 
   const updateToolbar = useCallback(() => {
     const selection = $getSelection();
@@ -81,7 +85,6 @@ export default function ToolbarPlugin() {
       const elementKey = element.getKey();
       const elementDOM = editor.getElementByKey(elementKey);
       if (elementDOM !== null) {
-        setSelectedElementKey(elementKey);
         if ($isListNode(element)) {
           const parentList = $getNearestNodeOfType(anchorNode, ListNode);
           const type = parentList ? parentList.getTag() : element.getTag();
@@ -99,27 +102,24 @@ export default function ToolbarPlugin() {
       setIsUnderline(selection.hasFormat("underline"));
       setIsStrikethrough(selection.hasFormat("strikethrough"));
 
-      // Update links
-      const node = getSelectedNode(selection);
-      const parent = node.getParent();
+      // Update alignment
+      if (elementDOM !== null) {
+        const computedStyle = getComputedStyle(elementDOM);
+        const textAlign = computedStyle.textAlign;
+        setAlignmentType(
+          textAlign === "center"
+            ? "center"
+            : textAlign === "right"
+            ? "right"
+            : textAlign === "justify"
+            ? "justify"
+            : "left"
+        );
+      } else {
+        setAlignmentType("left");
+      }
     }
   }, [editor]);
-
-  function getSelectedNode(selection: RangeSelection) {
-    const anchor = selection.anchor;
-    const focus = selection.focus;
-    const anchorNode = selection.anchor.getNode();
-    const focusNode = selection.focus.getNode();
-    if (anchorNode === focusNode) {
-      return anchorNode;
-    }
-    const isBackward = selection.isBackward();
-    if (isBackward) {
-      return $isAtNodeEnd(focus) ? anchorNode : focusNode;
-    } else {
-      return $isAtNodeEnd(anchor) ? focusNode : anchorNode;
-    }
-  }
 
   useEffect(() => {
     return mergeRegister(
@@ -253,41 +253,32 @@ export default function ToolbarPlugin() {
         </button>
         <Divider />
         <button
-          onClick={() => {
-            editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "left");
-          }}
-          className="toolbar-item spaced"
-          aria-label="Left Align"
+          className="toolbar-item block-controls"
+          onClick={() =>
+            setShowAlignmentOptionsDropDown(!showAlignmentOptionsDropDown)
+          }
+          aria-label="Alignment Options"
         >
-          <i className="format left-align" />
+          <i className={alignmentType + "-align"} />
+          <span className="text">
+            {
+              alignmentTypeToAlignmentName[
+                alignmentType as keyof typeof alignmentTypeToAlignmentName
+              ]
+            }
+          </span>
+          <i className="chevron-down" />
         </button>
-        <button
-          onClick={() => {
-            editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "center");
-          }}
-          className="toolbar-item spaced"
-          aria-label="Center Align"
-        >
-          <i className="format center-align" />
-        </button>
-        <button
-          onClick={() => {
-            editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "right");
-          }}
-          className="toolbar-item spaced"
-          aria-label="Right Align"
-        >
-          <i className="format right-align" />
-        </button>
-        <button
-          onClick={() => {
-            editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "justify");
-          }}
-          className="toolbar-item"
-          aria-label="Justify Align"
-        >
-          <i className="format justify-align" />
-        </button>
+        {showAlignmentOptionsDropDown &&
+          createPortal(
+            <AlignmentOptionsDropdownList
+              editor={editor}
+              alignmentType={alignmentType}
+              toolbarRef={toolbarRef}
+              setShowAlignmentOptionsDropDown={setShowAlignmentOptionsDropDown}
+            />,
+            document.body
+          )}
         <Divider />
         <button
           onClick={() =>
