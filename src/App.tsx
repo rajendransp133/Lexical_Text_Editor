@@ -25,6 +25,8 @@ import { HeadingNode } from "@lexical/rich-text";
 import { ListNode } from "@lexical/list";
 import { ListItemNode } from "@lexical/list";
 import { QuoteNode } from "@lexical/rich-text";
+import { ImageNode } from "./nodes/ImageNode";
+import ImagesPlugin from "./Plugins/ImagePlugin";
 
 const placeholder = "Enter some rich text...";
 
@@ -134,6 +136,7 @@ const editorConfig = {
     ListNode,
     ListItemNode,
     QuoteNode,
+    ImageNode,
   ],
   onError(error: Error) {
     throw error;
@@ -143,30 +146,33 @@ const editorConfig = {
 
 function App() {
   return (
-    <div className="max-w-4xl mx-auto px-8 my-16">
+    <div className="max-w-4xl mx-auto px-8 my-16 ">
       <h1>React.js Rich Text Lexical Example</h1>
-      <LexicalComposer initialConfig={editorConfig}>
-        <div className="editor-container">
-          <ToolbarPlugin />
-          <div className="editor-inner">
-            <RichTextPlugin
-              contentEditable={
-                <ContentEditable
-                  className="editor-input"
-                  aria-placeholder={placeholder}
-                  placeholder={
-                    <div className="editor-placeholder">{placeholder}</div>
-                  }
-                />
-              }
-              ErrorBoundary={LexicalErrorBoundary}
-            />
-            <HistoryPlugin />
-            <AutoFocusPlugin />
-            <ListPlugin />
+      <div className="editor-shell">
+        <LexicalComposer initialConfig={editorConfig}>
+          <div className="editor-container ">
+            <ToolbarPlugin />
+            <div className="editor-inner">
+              <RichTextPlugin
+                contentEditable={
+                  <ContentEditable
+                    className="editor-input"
+                    aria-placeholder={placeholder}
+                    placeholder={
+                      <div className="editor-placeholder">{placeholder}</div>
+                    }
+                  />
+                }
+                ErrorBoundary={LexicalErrorBoundary}
+              />
+              <HistoryPlugin />
+              <AutoFocusPlugin />
+              <ListPlugin />
+              <ImagesPlugin />
+            </div>
           </div>
-        </div>
-      </LexicalComposer>
+        </LexicalComposer>
+      </div>
     </div>
   );
 }
