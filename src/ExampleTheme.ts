@@ -28,6 +28,8 @@ const exampleTheme = {
     hashtag: "editor-text-hashtag",
     underline: "editor-text-underline",
     strikethrough: "editor-text-strikethrough",
+    subscript: "editor-textSubscript",
+    superscript: "editor-textSuperscript",
     underlineStrikethrough: "editor-text-underlineStrikethrough",
     code: "editor-text-code",
   },

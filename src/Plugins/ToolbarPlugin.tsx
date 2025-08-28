@@ -65,6 +65,8 @@ export default function ToolbarPlugin() {
   const [isItalic, setIsItalic] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
   const [isStrikethrough, setIsStrikethrough] = useState(false);
+  const [isSubscript, setIsSubscript] = useState(false);
+  const [isSuperscript, setIsSuperscript] = useState(false);
   const [blockType, setBlockType] = useState("paragraph");
   const [showBlockOptionsDropDown, setShowBlockOptionsDropDown] =
     useState(false);
@@ -101,7 +103,8 @@ export default function ToolbarPlugin() {
       setIsItalic(selection.hasFormat("italic"));
       setIsUnderline(selection.hasFormat("underline"));
       setIsStrikethrough(selection.hasFormat("strikethrough"));
-
+      setIsSubscript(selection.hasFormat("subscript"));
+      setIsSuperscript(selection.hasFormat("superscript"));
       // Update alignment
       if (elementDOM !== null) {
         const computedStyle = getComputedStyle(elementDOM);
@@ -306,6 +309,26 @@ export default function ToolbarPlugin() {
           className="toolbar-item spaced"
         >
           <i className="icon equation" />
+        </button>
+        <button
+          onClick={() => {
+            activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, "subscript");
+          }}
+          className={"toolbar-item " + (isSubscript ? "active" : "")}
+          title="Subscript"
+          aria-label="Format text with a subscript"
+        >
+          <i className="format subscript" />
+        </button>
+        <button
+          onClick={() => {
+            activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, "superscript");
+          }}
+          className={"toolbar-item " + (isSuperscript ? "active" : "")}
+          title="Superscript"
+          aria-label="Format text with a superscript"
+        >
+          <i className="format superscript" />
         </button>
       </div>
     </>

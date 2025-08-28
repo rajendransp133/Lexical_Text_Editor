@@ -741,6 +741,14 @@ i.equation {
   background-image: url(/icons/plus-slash-minus.svg);
 }
 
+i.subscript {
+  background-image: url(/icons/type-subscript.svg);
+}
+
+i.superscript {
+  background-image: url(/icons/type-superscript.svg);
+}
+
 .editor-shell .editor-image .image-resizer {
   display: block;
   width: 7px;
