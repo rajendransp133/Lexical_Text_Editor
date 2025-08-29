@@ -1,5 +1,28 @@
 @import "tailwindcss";
 
+/* Ensure text is always visible in Lexical editors */
+[contenteditable="true"] {
+  color: #0e2023 !important;
+}
+
+[contenteditable="true"] * {
+  color: #0e2023 !important;
+}
+
+/* Additional safety rules for Lexical text visibility */
+.LexicalEditor_contentEditable {
+  color: #0e2023 !important;
+}
+
+.LexicalEditor_contentEditable * {
+  color: #0e2023 !important;
+}
+
+/* Ensure all editor container contents are visible */
+[class*="editor-container"] * {
+  color: #0e2023 !important;
+}
+
 body {
   margin: 0;
   background: #eee;
@@ -131,6 +154,238 @@ h1 {
   pointer-events: none;
 }
 
+/* Question Editor - Large size for main question input */
+.editor-container-question {
+  margin: 0;
+  border-radius: 1.875rem;
+  max-width: 100%;
+  color: #0e2023;
+  position: relative;
+  line-height: 1.5;
+  font-weight: 600;
+  text-align: left;
+  border: 1px solid #8c8c8c;
+  font-size: 1.5rem;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.editor-container-question:focus-within {
+  border-color: #263eac;
+}
+
+.editor-inner-question {
+  background: transparent;
+  border-radius: 1.875rem;
+  position: relative;
+}
+
+.editor-input-question {
+  min-height: 120px;
+  resize: vertical;
+  font-size: 1.5rem;
+  font-weight: 600;
+  caret-color: #0e2023;
+  position: relative;
+  tab-size: 1;
+  outline: 0;
+  padding: 1rem;
+  color: #0e2023 !important;
+}
+
+.editor-input-question * {
+  color: #0e2023 !important;
+}
+
+.editor-placeholder-question {
+  color: #8c8c8c;
+  overflow: hidden;
+  position: absolute;
+  text-overflow: ellipsis;
+  top: 1rem;
+  left: 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  user-select: none;
+  display: inline-block;
+  pointer-events: none;
+}
+
+/* Option Editor - Medium size for MCQ/MSQ options */
+.editor-container-option {
+  margin: 0;
+  border: none;
+  border-bottom: 1px solid #8c8c8c;
+  border-radius: 0;
+  max-width: 100%;
+  color: #0e2023;
+  position: relative;
+  line-height: 1.5;
+  font-weight: 400;
+  text-align: left;
+  font-size: 1.5rem;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.editor-container-option:focus-within {
+  border-bottom-color: #263eac;
+  border-bottom-width: 2px;
+}
+
+.editor-inner-option {
+  background: transparent;
+  border-radius: 0;
+  position: relative;
+}
+
+.editor-input-option {
+  min-height: 40px;
+  resize: none;
+  font-size: 1.5rem;
+  font-weight: 400;
+  caret-color: #0e2023;
+  position: relative;
+  tab-size: 1;
+  outline: 0;
+  padding: 0.625rem 0;
+  color: #0e2023 !important;
+}
+
+.editor-input-option * {
+  color: #0e2023 !important;
+}
+
+.editor-placeholder-option {
+  color: #999999;
+  overflow: hidden;
+  position: absolute;
+  text-overflow: ellipsis;
+  top: 0.625rem;
+  left: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+  user-select: none;
+  display: inline-block;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* NAT Input Editor - Small size for numerical inputs */
+.editor-container-nat {
+  margin: 0;
+  border: none;
+  border-bottom: 1px solid #8c8c8c;
+  border-radius: 0;
+  max-width: 12rem;
+  min-width: 8rem;
+  color: #0e2023;
+  position: relative;
+  line-height: 1.5;
+  font-weight: 400;
+  text-align: left;
+  font-size: 1.5rem;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.editor-container-nat:focus-within {
+  border-bottom-color: #263eac;
+  border-bottom-width: 2px;
+}
+
+.editor-inner-nat {
+  background: transparent;
+  border-radius: 0;
+  position: relative;
+}
+
+.editor-input-nat {
+  min-height: 32px;
+  resize: none;
+  font-size: 1.5rem;
+  font-weight: 400;
+  caret-color: #0e2023;
+  position: relative;
+  tab-size: 1;
+  outline: 0;
+  padding: 0.5rem 0.5rem 0.5rem 0;
+  color: #0e2023 !important;
+}
+
+.editor-input-nat * {
+  color: #0e2023 !important;
+}
+
+.editor-placeholder-nat {
+  color: #999999;
+  overflow: hidden;
+  position: absolute;
+  text-overflow: ellipsis;
+  top: 0.5rem;
+  left: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  user-select: none;
+  display: inline-block;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Submit Solution Editor - Small compact size */
+.editor-container-submit {
+  margin: 0;
+  border: 1px solid #0e2023;
+  border-radius: 1.875rem;
+  max-width: 100%;
+  color: #0e2023;
+  position: relative;
+  line-height: 1.5;
+  font-weight: 400;
+  text-align: left;
+  font-size: 1rem;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.editor-container-submit:focus-within {
+  border-color: #263eac;
+  border-width: 2px;
+}
+
+.editor-inner-submit {
+  background: transparent;
+  border-radius: 1.875rem;
+  position: relative;
+}
+
+.editor-input-submit {
+  min-height: 60px;
+  resize: none;
+  font-size: 1rem;
+  font-weight: 400;
+  caret-color: #0e2023;
+  position: relative;
+  tab-size: 1;
+  outline: 0;
+  padding: 1rem;
+  color: #0e2023 !important;
+}
+
+.editor-input-submit * {
+  color: #0e2023 !important;
+}
+
+.editor-placeholder-submit {
+  color: #8c8c8c;
+  overflow: hidden;
+  position: absolute;
+  text-overflow: ellipsis;
+  top: 1rem;
+  left: 1rem;
+  font-size: 1rem;
+  font-weight: 400;
+  user-select: none;
+  display: inline-block;
+  pointer-events: none;
+}
+
 .editor-text-bold {
   font-weight: bold;
 }
@@ -239,6 +494,7 @@ h1 {
   margin: 0;
   margin-bottom: 8px;
   position: relative;
+  color: #0e2023;
 }
 
 .editor-paragraph:last-child {

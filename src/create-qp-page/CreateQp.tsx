@@ -1,16 +1,52 @@
 import React from "react";
 
-import { useState, useEffect } from "react";
+import {
+  useState,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+  useCallback,
+} from "react";
 
 import { PiNotepadBold } from "react-icons/pi";
 import { BsFillInboxesFill } from "react-icons/bs";
 
-import { qp } from "../../assets/qp";
-import { qp2 } from "../../assets/qp2";
-import { qp3 } from "../../assets/qp3";
-import { qp4 } from "../../assets/qp4";
+// Lexical imports
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
+import { ListPlugin } from "@lexical/react/LexicalListPlugin";
+import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
-import type { JEEStructure, Section, Weightage } from "./types_qp";
+// Lexical nodes
+import {
+  ParagraphNode,
+  TextNode,
+  $getRoot,
+  $isTextNode,
+  type DOMConversionMap,
+  type DOMExportOutput,
+  type DOMExportOutputMap,
+  isHTMLElement,
+  type Klass,
+  type LexicalEditor,
+  type LexicalNode,
+} from "lexical";
+import { HeadingNode, QuoteNode } from "@lexical/rich-text";
+import { ListNode, ListItemNode } from "@lexical/list";
+import { ImageNode } from "../nodes/ImageNode";
+import { EquationNode } from "../nodes/EquationNode";
+
+// Lexical plugins
+import ToolbarPlugin from "../Plugins/ToolbarPlugin";
+import ImagesPlugin from "../Plugins/ImagePlugin";
+import EquationsPlugin from "../Plugins/EquationPlugin";
+
+// Theme
+import ExampleTheme from "../ExampleTheme";
 
 import {
   questions as defaultQuestions,
@@ -21,38 +57,251 @@ import {
 
 import { Panel } from "./Panel";
 import Navbar from "./NavBar";
+import { parseAllowedColor, parseAllowedFontSize } from "../styleConfig";
 
-import Mcq from "./Mcq";
-import Msq from "./Msq";
-import Nat from "./Nat";
-
-// Map of question papers
-const questionPapers: { [key: number]: JEEStructure } = {
-  1: qp,
-  2: qp2,
-  3: qp3,
-  4: qp4,
+// Helper functions for DOM export/import (copied from App.tsx)
+const removeStylesExportDOM = (
+  editor: LexicalEditor,
+  target: LexicalNode
+): DOMExportOutput => {
+  const output = target.exportDOM(editor);
+  if (output && isHTMLElement(output.element)) {
+    // Remove all inline styles and classes if the element is an HTMLElement
+    // Children are checked as well since TextNode can be nested
+    // in i, b, and strong tags.
+    for (const el of [
+      output.element,
+      ...output.element.querySelectorAll("[style],[class]"),
+    ]) {
+      el.removeAttribute("class");
+      el.removeAttribute("style");
+    }
+  }
+  return output;
 };
 
-const qpList = [1, 2, 3, 4];
+const exportMap: DOMExportOutputMap = new Map<
+  Klass<LexicalNode>,
+  (editor: LexicalEditor, target: LexicalNode) => DOMExportOutput
+>([
+  [ParagraphNode, removeStylesExportDOM],
+  [TextNode, removeStylesExportDOM],
+]);
+
+const getExtraStyles = (element: HTMLElement): string => {
+  // Parse styles from pasted input, but only if they match exactly the
+  // sort of styles that would be produced by exportDOM
+  let extraStyles = "";
+  const fontSize = parseAllowedFontSize(element.style.fontSize);
+  const backgroundColor = parseAllowedColor(element.style.backgroundColor);
+  const color = parseAllowedColor(element.style.color);
+  if (fontSize !== "" && fontSize !== "15px") {
+    extraStyles += `font-size: ${fontSize};`;
+  }
+  if (backgroundColor !== "" && backgroundColor !== "rgb(255, 255, 255)") {
+    extraStyles += `background-color: ${backgroundColor};`;
+  }
+  if (color !== "" && color !== "rgb(0, 0, 0)") {
+    extraStyles += `color: ${color};`;
+  }
+  return extraStyles;
+};
+
+const constructImportMap = (): DOMConversionMap => {
+  const importMap: DOMConversionMap = {};
+
+  // Wrap all TextNode importers with a function that also imports
+  // the custom styles implemented by the playground
+  for (const [tag, fn] of Object.entries(TextNode.importDOM() || {})) {
+    importMap[tag] = (importNode) => {
+      const importer = fn(importNode);
+      if (!importer) {
+        return null;
+      }
+      return {
+        ...importer,
+        conversion: (element) => {
+          const output = importer.conversion(element);
+          if (
+            output === null ||
+            output.forChild === undefined ||
+            output.after !== undefined ||
+            output.node !== null
+          ) {
+            return output;
+          }
+          const extraStyles = getExtraStyles(element);
+          if (extraStyles) {
+            const { forChild } = output;
+            return {
+              ...output,
+              forChild: (child, parent) => {
+                const textNode = forChild(child, parent);
+                if ($isTextNode(textNode)) {
+                  textNode.setStyle(textNode.getStyle() + extraStyles);
+                }
+                return textNode;
+              },
+            };
+          }
+          return output;
+        },
+      };
+    };
+  }
+
+  return importMap;
+};
+
+// Editor configuration
+const createEditorConfig = (namespace: string) => ({
+  html: {
+    export: exportMap,
+    import: constructImportMap(),
+  },
+  namespace,
+  nodes: [
+    ParagraphNode,
+    TextNode,
+    HeadingNode,
+    ListNode,
+    ListItemNode,
+    QuoteNode,
+    ImageNode,
+    EquationNode,
+  ],
+  onError(error: Error) {
+    console.error(error);
+  },
+  theme: ExampleTheme,
+});
+
+// Reusable Editor Component
+interface RichTextEditorProps {
+  placeholder: string;
+  variant: "question" | "option" | "nat" | "submit";
+  onChange?: (value: string) => void;
+  onBlur?: () => void;
+  autoFocus?: boolean;
+  tabIndex?: number;
+}
+
+export interface RichTextEditorHandle {
+  focus: () => void;
+}
+
+const RichTextEditor = React.memo(
+  forwardRef<RichTextEditorHandle, RichTextEditorProps>(
+    (
+      { placeholder, variant, onChange, onBlur, autoFocus = false, tabIndex },
+      ref
+    ) => {
+      const editorConfig = createEditorConfig(`CreateQP-${variant}`);
+
+      const editorRef = useRef<any>(null);
+
+      const containerClass = `editor-container-${variant}`;
+      const innerClass = `editor-inner-${variant}`;
+      const inputClass = `editor-input-${variant}`;
+      const placeholderClass = `editor-placeholder-${variant}`;
+
+      // Expose focus method to parent component
+      useImperativeHandle(ref, () => ({
+        focus: () => {
+          if (editorRef.current) {
+            editorRef.current.focus();
+          }
+        },
+      }));
+
+      // Component to handle content changes
+      const OnChangePlugin = React.memo(
+        ({ onChange }: { onChange: (value: string) => void }) => {
+          const [editor] = useLexicalComposerContext();
+
+          React.useEffect(() => {
+            return editor.registerUpdateListener(({ editorState }) => {
+              editorState.read(() => {
+                const root = $getRoot();
+                const textContent = root.getTextContent();
+                onChange(textContent);
+              });
+            });
+          }, [editor, onChange]);
+
+          return null;
+        }
+      );
+
+      // Component to handle focus
+      const FocusPlugin = React.memo(() => {
+        const [editor] = useLexicalComposerContext();
+
+        React.useEffect(() => {
+          if (editorRef.current) {
+            editorRef.current = editor.getRootElement();
+          }
+        }, [editor]);
+
+        return null;
+      });
+
+      return (
+        <LexicalComposer initialConfig={editorConfig}>
+          <div className={containerClass}>
+            {(variant === "question" ||
+              variant === "submit" ||
+              variant === "option") && <ToolbarPlugin />}
+            <div className={innerClass}>
+              <RichTextPlugin
+                contentEditable={
+                  <ContentEditable
+                    className={inputClass}
+                    aria-placeholder={placeholder}
+                    placeholder={
+                      <div className={placeholderClass}>{placeholder}</div>
+                    }
+                    onBlur={onBlur}
+                    tabIndex={tabIndex}
+                  />
+                }
+                ErrorBoundary={LexicalErrorBoundary}
+              />
+              <HistoryPlugin />
+              {autoFocus && <AutoFocusPlugin />}
+              <ListPlugin />
+              {(variant === "question" ||
+                variant === "submit" ||
+                variant === "option") && (
+                <>
+                  <ImagesPlugin />
+                  <EquationsPlugin />
+                </>
+              )}
+              {onChange && <OnChangePlugin onChange={onChange} />}
+              <FocusPlugin />
+            </div>
+          </div>
+        </LexicalComposer>
+      );
+    }
+  )
+);
 
 function CreateQpPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const [sectionNavigation, setSectionNavigation] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
-  const [activePaper, setActivePaper] = useState(1);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [mcqAnswers, setMcqAnswers] = useState<{ [key: number]: number }>({});
-  const [msqAnswers, setMsqAnswers] = useState<{ [key: number]: number[] }>({});
-
-  const [natAnswers, setNatAnswers] = useState<{
-    [key: number]: { start: number; end: number; precision: number };
-  }>({});
-  const [instructionOpen, setInstructionOpen] = useState(true);
+  const [, setInstructionOpen] = useState(true);
 
   // Store question text inputs for each question index
   const [questionTexts, setQuestionTexts] = useState<{ [key: number]: string }>(
+    {}
+  );
+
+  // Store solution text for each question
+  const [solutionTexts, setSolutionTexts] = useState<{ [key: number]: string }>(
     {}
   );
   const [newQuestionOptions, setNewQuestionOptions] = useState<string[]>([
@@ -64,145 +313,18 @@ function CreateQpPage() {
   const [newQuestionAnswer, setNewQuestionAnswer] = useState<number | number[]>(
     []
   );
-  const [newQuestionNatValues, setNewQuestionNatValues] = useState({
+  const [, setNewQuestionNatValues] = useState({
     start: 0,
     end: 100,
     precision: 0,
   });
-
-  // Get current question paper data based on activePaper
-  const presetdata: JEEStructure = questionPapers[activePaper] || qp;
 
   const questionsData: ConfigQuestion[] = defaultQuestions();
   const sectionData: ConfigSection = defaultSection();
 
   const currentQuestion: ConfigQuestion = questionsData[currentIndex];
 
-  function getNatIndex(sectionName: string, questionNo: number) {
-    const section = presetdata.section?.find((s) => s.name === sectionName);
-    if (!section) return 0;
-    let natCount = 0;
-    let currentCount = 1;
-    for (const w of section.weightage) {
-      for (let i = 0; i < w.count; i++) {
-        if (currentCount === questionNo) {
-          if (w.type === "nat") return natCount;
-          else return -1;
-        }
-        if (w.type === "nat") natCount++;
-        currentCount++;
-      }
-    }
-    return -1;
-  }
-
-  function getTypeIndex(
-    sectionName: string,
-    questionNo: number,
-    type: "mcq" | "msq" | "nat"
-  ) {
-    const section = presetdata.section?.find((s) => s.name === sectionName);
-    if (!section) return -1;
-    let typeCount = 0;
-    let currentCount = 1;
-    for (const w of section.weightage) {
-      for (let i = 0; i < w.count; i++) {
-        if (currentCount === questionNo) {
-          if (w.type === type) return typeCount;
-          else return -1;
-        }
-        if (w.type === type) typeCount++;
-        currentCount++;
-      }
-    }
-    return -1;
-  }
-
-  let questionProps: any = null;
-  let questionText = "";
-
-  let isPlaceholder = false;
-  if (currentQuestion.type === "mcq") {
-    const section = presetdata.section?.find(
-      (s) => s.name === currentQuestion.sectionName
-    );
-
-    const mcqList =
-      section?.weightage.find((w) => w.type === "mcq")?.questions || [];
-
-    const mcqIndex = getTypeIndex(
-      currentQuestion.sectionName,
-      currentQuestion.questionNo,
-      "mcq"
-    );
-    const mcqQ = mcqList[mcqIndex] || mcqList[0] || {};
-
-    questionProps = {
-      id: mcqQ.id || `mcq-${currentIndex}`,
-      options: mcqQ.options || ["Option 1", "Option 2", "Option 3", "Option 4"],
-      answer: mcqAnswers[currentIndex] ?? mcqQ.answer ?? -1,
-      setAnswer: (idx: number) =>
-        setMcqAnswers((a) => ({ ...a, [currentIndex]: idx })),
-    };
-
-    questionText = mcqQ.question || "";
-
-    isPlaceholder = !mcqQ.question;
-  } else if (currentQuestion.type === "msq") {
-    const section = presetdata.section?.find(
-      (s) => s.name === currentQuestion.sectionName
-    );
-
-    const msqList =
-      section?.weightage.find((w) => w.type === "msq")?.questions || [];
-
-    const msqIndex = getTypeIndex(
-      currentQuestion.sectionName,
-      currentQuestion.questionNo,
-      "msq"
-    );
-    const msqQ = msqList[msqIndex] || msqList[0] || {};
-
-    questionProps = {
-      id: msqQ.id || `msq-${currentIndex}`,
-      options: msqQ.options || ["Option 1", "Option 2", "Option 3", "Option 4"],
-      answer: msqAnswers[currentIndex] ?? msqQ.answer ?? [],
-      setAnswer: (indices: number[]) =>
-        setMsqAnswers((a) => ({ ...a, [currentIndex]: indices })),
-    };
-
-    questionText = msqQ.question || "";
-
-    isPlaceholder = !msqQ.question;
-  } else if (currentQuestion.type === "nat") {
-    const section = presetdata.section?.find(
-      (s) => s.name === currentQuestion.sectionName
-    );
-
-    const natList =
-      section?.weightage.find((w) => w.type === "nat")?.questions || [];
-
-    const natIndex = getNatIndex(
-      currentQuestion.sectionName,
-      currentQuestion.questionNo
-    );
-
-    const natQ = natList[natIndex] || natList[0] || {};
-
-    questionProps = {
-      id: natQ.id || `nat-${currentIndex}`,
-      start: natAnswers[currentIndex]?.start ?? natQ.start ?? 0,
-      end: natAnswers[currentIndex]?.end ?? natQ.end ?? 100,
-      precision: natAnswers[currentIndex]?.precision ?? natQ.precision ?? 0,
-
-      setValues: (values: { start: number; end: number; precision: number }) =>
-        setNatAnswers((prev) => ({ ...prev, [currentIndex]: values })),
-    };
-
-    isPlaceholder = !natQ.question;
-  }
-
-  const paperQuestionText = questionText;
+  // All questions are now editable, no preset data needed
 
   const handleNext = () => {
     if (currentIndex < questionsData.length - 1)
@@ -228,10 +350,6 @@ function CreateQpPage() {
     );
   };
 
-  const handlePaperSelect = (paperNumber: number) => {
-    setActivePaper(paperNumber);
-  };
-
   const handleCancelCreate = () => {
     setQuestionTexts((prev) => ({ ...prev, [currentIndex]: "" }));
     setNewQuestionOptions(["", "", "", ""]);
@@ -254,40 +372,60 @@ function CreateQpPage() {
     setNewQuestionNatValues({ start: 0, end: 100, precision: 0 });
   };
 
-  // Helper function to get question text for a specific paper
-  const getQuestionTextForPaper = (paperNumber: number): string => {
-    const paperData = questionPapers[paperNumber] || qp;
-    const section = paperData.section?.find(
-      (s) => s.name === currentQuestion.sectionName
-    );
-
-    if (!section) return "";
-
-    if (currentQuestion.type === "mcq") {
-      const mcqList =
-        section.weightage.find((w) => w.type === "mcq")?.questions || [];
-      const mcqQ = mcqList[currentQuestion.questionNo - 1] || mcqList[0] || {};
-      return mcqQ.question || "";
-    } else if (currentQuestion.type === "msq") {
-      const msqList =
-        section.weightage.find((w) => w.type === "msq")?.questions || [];
-      const msqQ = msqList[currentQuestion.questionNo - 1] || msqList[0] || {};
-      return msqQ.question || "";
-    } else if (currentQuestion.type === "nat") {
-      const natList =
-        section.weightage.find((w) => w.type === "nat")?.questions || [];
-      const natIdx = getNatIndex(
-        currentQuestion.sectionName,
-        currentQuestion.questionNo
-      );
-      const natQ = natList[natIdx] || {};
-      return natQ.question || "";
-    }
-
-    return "";
-  };
-
   // Removed unused handleSaveQuestion function
+
+  // Memoized onChange handlers to prevent recreation on every render
+  const handleQuestionTextChange = useCallback(
+    (value: string) => {
+      setQuestionTexts((prev) => ({
+        ...prev,
+        [currentIndex]: value,
+      }));
+    },
+    [currentIndex]
+  );
+
+  const handleOptionChange = useCallback(
+    (index: number) => (value: string) => {
+      setNewQuestionOptions((prev) => {
+        const newOptions = [...prev];
+        newOptions[index] = value;
+        return newOptions;
+      });
+    },
+    []
+  );
+
+  const handleSolutionTextChange = useCallback(
+    (value: string) => {
+      setSolutionTexts((prev) => ({
+        ...prev,
+        [currentIndex]: value,
+      }));
+    },
+    [currentIndex]
+  );
+
+  const handleNatStartChange = useCallback((value: string) => {
+    setNewQuestionNatValues((prev) => ({
+      ...prev,
+      start: Number(value) || 0,
+    }));
+  }, []);
+
+  const handleNatEndChange = useCallback((value: string) => {
+    setNewQuestionNatValues((prev) => ({
+      ...prev,
+      end: Number(value) || 0,
+    }));
+  }, []);
+
+  const handleNatPrecisionChange = useCallback((value: string) => {
+    setNewQuestionNatValues((prev) => ({
+      ...prev,
+      precision: Number(value) || 0,
+    }));
+  }, []);
 
   return (
     <main className="flex h-screen flex-col gap-6 bg-[#EFF0F5]">
@@ -355,272 +493,183 @@ function CreateQpPage() {
             />
           )}
 
-          {!drawerOpen && (
-            <>
-              <section className="flex items-center justify-between text-2xl font-semibold text-[#0E2023]">
-                <article className="flex basis-4/5 flex-col gap-2">
-                  <header className="font-normal text-[#8C8C8C]">
-                    {currentQuestion.sectionName} | Question Number{" "}
-                    {currentQuestion.questionNo}
-                  </header>
-                  <section>
-                    {isPlaceholder ? (
-                      <textarea
-                        className="w-full min-h-[120px] p-4 border border-[#8C8C8C] rounded-4xl resize-vertical bg-transparent text-2xl font-semibold text-[#0E2023] placeholder:text-[#8C8C8C] focus:outline-none focus:border-[#263EAC]"
-                        value={questionTexts[currentIndex] || ""}
-                        onChange={(e) =>
-                          setQuestionTexts((prev) => ({
-                            ...prev,
-                            [currentIndex]: e.target.value,
-                          }))
-                        }
-                        placeholder="Enter your question here..."
-                      />
-                    ) : questionText ? (
-                      <span>{questionText}</span>
-                    ) : (
-                      <textarea
-                        className="w-full min-h-[120px] p-4 border border-[#8C8C8C] rounded-4xl resize-vertical bg-transparent text-2xl font-semibold text-[#0E2023] placeholder:text-[#8C8C8C] focus:outline-none focus:border-[#263EAC]"
-                        value={questionTexts[currentIndex] || ""}
-                        onChange={(e) =>
-                          setQuestionTexts((prev) => ({
-                            ...prev,
-                            [currentIndex]: e.target.value,
-                          }))
-                        }
-                        placeholder="Enter the question here or click here to add an image"
-                      />
-                    )}
-                  </section>
-                </article>
-                <aside className="flex basis-1/5 justify-end gap-15">
-                  <section className="flex flex-col gap-2">
-                    <header className="font-normal text-[#8C8C8C]">
-                      Marks
-                    </header>
-                    <div className="text-base">
-                      <span className="rounded-4xl bg-[#91FFD5] p-2 text-[#093E29]">
-                        {currentQuestion.positive}
-                      </span>
-                      <span>&nbsp;|&nbsp;</span>
-                      <span className="rounded-4xl bg-[#FFEDED] p-2 text-[#642929]">
-                        {currentQuestion.negative}
-                      </span>
-                    </div>
-                  </section>
-                  <section className="flex flex-col gap-2">
-                    <header className="justify-between font-normal text-ternary-gray-dark">
-                      Question Type
-                    </header>
-                    <div className="flex items-center">
-                      <label htmlFor="type">
-                        {currentQuestion.type.toUpperCase()}
-                      </label>
-                    </div>
-                  </section>
-                </aside>
-              </section>
+          <section className="flex items-center justify-between text-2xl font-semibold text-[#0E2023]">
+            <article className="flex basis-4/5 flex-col gap-2">
+              <header className="font-normal text-[#8C8C8C]">
+                {currentQuestion.sectionName} | Question Number{" "}
+                {currentQuestion.questionNo}
+              </header>
               <section>
-                {isPlaceholder ? (
-                  <>
-                    {currentQuestion.type === "mcq" && (
-                      <div className="grid grid-cols-2 gap-10.5 text-2xl font-normal text-[#0E2023]">
-                        {newQuestionOptions.map((option, index) => (
-                          <div key={index} className="flex items-center gap-4">
-                            <div className="flex w-full items-center gap-4 border-b border-[#8C8C8C] py-2.5">
-                              <input
-                                type="radio"
-                                name="new-mcq-option"
-                                checked={newQuestionAnswer === index}
-                                onChange={() => setNewQuestionAnswer(index)}
-                              />
-                              <input
-                                type="text"
-                                className="flex-1 border-none bg-transparent outline-none"
-                                placeholder={`Option ${index + 1}`}
-                                value={option}
-                                onChange={(e) => {
-                                  const newOptions = [...newQuestionOptions];
-                                  newOptions[index] = e.target.value;
-                                  setNewQuestionOptions(newOptions);
-                                }}
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {currentQuestion.type === "msq" && (
-                      <div className="grid grid-cols-2 gap-10.5 text-2xl font-normal text-[#0E2023]">
-                        {newQuestionOptions.map((option, index) => (
-                          <div key={index} className="flex items-center gap-4">
-                            <div className="flex w-full items-center gap-4 border-b border-[#8C8C8C] py-2.5">
-                              <input
-                                type="checkbox"
-                                checked={
-                                  Array.isArray(newQuestionAnswer) &&
-                                  newQuestionAnswer.includes(index)
-                                }
-                                onChange={() => {
-                                  if (Array.isArray(newQuestionAnswer)) {
-                                    if (newQuestionAnswer.includes(index)) {
-                                      setNewQuestionAnswer(
-                                        newQuestionAnswer.filter(
-                                          (i) => i !== index
-                                        )
-                                      );
-                                    } else {
-                                      setNewQuestionAnswer([
-                                        ...newQuestionAnswer,
-                                        index,
-                                      ]);
-                                    }
-                                  }
-                                }}
-                              />
-                              <input
-                                type="text"
-                                className="flex-1 border-none bg-transparent outline-none"
-                                placeholder={`Option ${index + 1}`}
-                                value={option}
-                                onChange={(e) => {
-                                  const newOptions = [...newQuestionOptions];
-                                  newOptions[index] = e.target.value;
-                                  setNewQuestionOptions(newOptions);
-                                }}
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {currentQuestion.type === "nat" && (
-                      <div className="flex flex-col gap-4 text-2xl font-normal">
-                        <div className="py-4">
-                          <span>Number Between </span>
-                          <input
-                            className="no-spinner w-[10rem] border-b border-[#8C8C8C] pl-2"
-                            type="number"
-                            inputMode="decimal"
-                            step="any"
-                            placeholder="From"
-                            value={newQuestionNatValues.start || ""}
-                            onChange={(e) =>
-                              setNewQuestionNatValues((prev) => ({
-                                ...prev,
-                                start: Number(e.target.value) || 0,
-                              }))
-                            }
-                          />
-                          <span>and</span>
-                          <input
-                            className="no-spinner w-[10rem] border-b border-[#8C8C8C] pl-2"
-                            type="number"
-                            inputMode="decimal"
-                            step="any"
-                            placeholder="To"
-                            value={newQuestionNatValues.end || ""}
-                            onChange={(e) =>
-                              setNewQuestionNatValues((prev) => ({
-                                ...prev,
-                                end: Number(e.target.value) || 0,
-                              }))
-                            }
-                          />
-                        </div>
-                        <div className="py-4">
-                          <span>No of floating point digit:</span>
-                          <input
-                            className="no-spinner w-[10rem] border-b border-[#8C8C8C] pl-2"
-                            type="number"
-                            min={0}
-                            inputMode="numeric"
-                            placeholder="e.g. 2"
-                            value={newQuestionNatValues.precision || ""}
-                            onChange={(e) =>
-                              setNewQuestionNatValues((prev) => ({
-                                ...prev,
-                                precision: Number(e.target.value) || 0,
-                              }))
-                            }
-                          />
-                        </div>
-                      </div>
-                    )}
-                    <div className="mt-6 flex justify-end gap-4">
-                      <button
-                        className="rounded-4xl border border-[#0E2023] px-9 py-4.5 text-[#0E2023] hover:cursor-pointer"
-                        onClick={handleCancelCreate}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        className="rounded-4xl bg-[#1FB67C] px-9 py-4.5 text-[#EFF0F5] hover:cursor-pointer"
-                        onClick={handleSaveNewQuestion}
-                        disabled={!(questionTexts[currentIndex] || "").trim()}
-                      >
-                        Save Question
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {currentQuestion.type === "mcq" && (
-                      <Mcq {...questionProps} />
-                    )}
-                    {currentQuestion.type === "msq" && (
-                      <Msq {...questionProps} />
-                    )}
-                    {currentQuestion.type === "nat" && (
-                      <Nat {...questionProps} />
-                    )}
-                  </>
-                )}
+                <RichTextEditor
+                  variant="question"
+                  placeholder="Enter your question here..."
+                  onChange={handleQuestionTextChange}
+                  autoFocus
+                  tabIndex={1}
+                />
               </section>
-            </>
-          )}
+            </article>
+            <aside className="flex basis-1/5 justify-end gap-15">
+              <section className="flex flex-col gap-2">
+                <header className="font-normal text-[#8C8C8C]">Marks</header>
+                <div className="text-base">
+                  <span className="rounded-4xl bg-[#91FFD5] p-2 text-[#093E29]">
+                    {currentQuestion.positive}
+                  </span>
+                  <span>&nbsp;|&nbsp;</span>
+                  <span className="rounded-4xl bg-[#FFEDED] p-2 text-[#642929]">
+                    {currentQuestion.negative}
+                  </span>
+                </div>
+              </section>
+              <section className="flex flex-col gap-2">
+                <header className="justify-between font-normal text-ternary-gray-dark">
+                  Question Type
+                </header>
+                <div className="flex items-center">
+                  <label htmlFor="type">
+                    {currentQuestion.type.toUpperCase()}
+                  </label>
+                </div>
+              </section>
+            </aside>
+          </section>
 
-          {drawerOpen && (
-            <section className="grid grid-cols-2 gap-6">
-              {qpList.map((paperNumber) => {
-                const isActive = activePaper === paperNumber;
-                const paperQuestionText = getQuestionTextForPaper(paperNumber);
-
-                return (
-                  <div
-                    key={paperNumber}
-                    className={`flex cursor-pointer flex-col gap-4 rounded-4xl border p-6 transition-all duration-200 ${
-                      isActive
-                        ? "border-2 border-[#1FB67C] bg-[#EEFFF5]"
-                        : "bg-[#EFF0F5] hover:border-[#1FB67C]"
-                    }`}
-                    onClick={() => handlePaperSelect(paperNumber)}
-                  >
-                    <div className={`text-2xl font-normal text-[#0E2023]`}>
-                      Paper No. {paperNumber.toString().padStart(2, "0")}
-                    </div>
-
-                    <div className="text-2xl font-normal text-[#8C8C8C]">
-                      {currentQuestion.sectionName} | Question Number{" "}
-                      {currentQuestion.questionNo}
-                    </div>
-
-                    <div className="text-2xl font-semibold text-[#0E2023]">
-                      {paperQuestionText}
+          <section>
+            {currentQuestion.type === "mcq" && (
+              <div className="grid grid-cols-2 gap-10.5 text-2xl font-normal text-[#0E2023]">
+                {newQuestionOptions.map((option, index) => (
+                  <div key={index} className="flex items-center gap-4">
+                    <div className="flex w-full items-center gap-4 border-b border-[#8C8C8C] py-2.5">
+                      <input
+                        type="radio"
+                        name="new-mcq-option"
+                        checked={newQuestionAnswer === index}
+                        onChange={() => setNewQuestionAnswer(index)}
+                      />
+                      <div className="flex-1">
+                        <RichTextEditor
+                          variant="option"
+                          placeholder={`Option ${index + 1}`}
+                          onChange={handleOptionChange(index)}
+                          tabIndex={10 + index}
+                        />
+                      </div>
                     </div>
                   </div>
-                );
-              })}
-            </section>
-          )}
+                ))}
+              </div>
+            )}
+            {currentQuestion.type === "msq" && (
+              <div className="grid grid-cols-2 gap-10.5 text-2xl font-normal text-[#0E2023]">
+                {newQuestionOptions.map((option, index) => (
+                  <div key={index} className="flex items-center gap-4">
+                    <div className="flex w-full items-center gap-4 border-b border-[#8C8C8C] py-2.5">
+                      <input
+                        type="checkbox"
+                        checked={
+                          Array.isArray(newQuestionAnswer) &&
+                          newQuestionAnswer.includes(index)
+                        }
+                        onChange={() => {
+                          if (Array.isArray(newQuestionAnswer)) {
+                            if (newQuestionAnswer.includes(index)) {
+                              setNewQuestionAnswer(
+                                newQuestionAnswer.filter((i) => i !== index)
+                              );
+                            } else {
+                              setNewQuestionAnswer([
+                                ...newQuestionAnswer,
+                                index,
+                              ]);
+                            }
+                          }
+                        }}
+                      />
+                      <div className="flex-1">
+                        <RichTextEditor
+                          variant="option"
+                          placeholder={`Option ${index + 1}`}
+                          onChange={handleOptionChange(index)}
+                          tabIndex={20 + index}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {currentQuestion.type === "nat" && (
+              <div className="flex flex-col gap-4 text-2xl font-normal">
+                <div className="py-4 flex items-center gap-2">
+                  <span>Number Between </span>
+                  <RichTextEditor
+                    variant="nat"
+                    placeholder="From"
+                    onChange={handleNatStartChange}
+                    tabIndex={30}
+                  />
+                  <span> and </span>
+                  <RichTextEditor
+                    variant="nat"
+                    placeholder="To"
+                    onChange={handleNatEndChange}
+                    tabIndex={31}
+                  />
+                </div>
+                <div className="py-4 flex items-center gap-2">
+                  <span>No of floating point digit:</span>
+                  <RichTextEditor
+                    variant="nat"
+                    placeholder="e.g. 2"
+                    onChange={handleNatPrecisionChange}
+                    tabIndex={32}
+                  />
+                </div>
+              </div>
+            )}
+            <div className="mt-6 flex justify-end gap-4">
+              <button
+                className="rounded-4xl border border-[#0E2023] px-9 py-4.5 text-[#0E2023] hover:cursor-pointer"
+                onClick={handleCancelCreate}
+              >
+                Cancel
+              </button>
+              <button
+                className="rounded-4xl bg-[#1FB67C] px-9 py-4.5 text-[#EFF0F5] hover:cursor-pointer"
+                onClick={handleSaveNewQuestion}
+                disabled={!(questionTexts[currentIndex] || "").trim()}
+              >
+                Save Question
+              </button>
+            </div>
+          </section>
 
           <footer className="flex flex-col gap-4">
+            {/* Solution Input Section */}
+            <section className="w-full">
+              <div className="mb-4">
+                <h3 className="text-xl font-semibold text-[#0E2023] mb-2">
+                  Submit Your Solution
+                </h3>
+                <RichTextEditor
+                  variant="submit"
+                  placeholder="Write your solution here..."
+                  onChange={handleSolutionTextChange}
+                  tabIndex={40}
+                />
+              </div>
+            </section>
+
             <nav className="flex items-center justify-end gap-4 text-2xl font-normal">
               {/* <div className="flex items-center justify-center gap-2">
               <FaKeyboard />
               <p>↓</p>
             </div> */}
-              <button className="cursor-pointer rounded-4xl border border-secondary-black px-9 py-4.5">
+              <button
+                className="cursor-pointer rounded-4xl border border-secondary-black px-9 py-4.5"
+                disabled={!(solutionTexts[currentIndex] || "").trim()}
+              >
                 Submit Solution
               </button>
 
