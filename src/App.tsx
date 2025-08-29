@@ -18,6 +18,8 @@ import {
   TextNode,
   $getRoot,
 } from "lexical";
+
+import "./App.css";
 // Note: You may need to install @lexical/html with: npm install @lexical/html
 // import { $generateHtmlFromNodes } from "@lexical/html";
 
@@ -33,11 +35,22 @@ import { ImageNode } from "./nodes/ImageNode";
 import ImagesPlugin from "./Plugins/ImagePlugin";
 import { EquationNode } from "./nodes/EquationNode";
 import EquationsPlugin from "./Plugins/EquationPlugin";
+import CreateQP from "./create-qp-page/createQP";
+import { useState } from "react";
+import type React from "react";
 
 const placeholder = "Enter some rich text...";
 
 // Submit handler component to access editor context
-function SubmitButton() {
+function SubmitButton({
+  variant = "submit",
+  onClick,
+  children,
+}: {
+  variant?: "submit" | "next";
+  onClick?: () => void;
+  children?: React.ReactNode;
+}) {
   const [editor] = useLexicalComposerContext();
 
   const handleSubmit = () => {
@@ -82,12 +95,23 @@ function SubmitButton() {
     });
   };
 
+  const handleClick = () => {
+    if (variant === "submit") {
+      handleSubmit();
+    } else if (onClick) {
+      onClick();
+    }
+  };
+
+  const buttonText = children || (variant === "submit" ? "Submit" : "Next");
+  const buttonClass =
+    variant === "submit"
+      ? "bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md mt-4 transition-colors"
+      : "bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md mt-4 transition-colors";
+
   return (
-    <button
-      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md mt-4 transition-colors"
-      onClick={handleSubmit}
-    >
-      Submit
+    <button className={buttonClass} onClick={handleClick}>
+      {buttonText}
     </button>
   );
 }
@@ -208,37 +232,54 @@ const editorConfig = {
 };
 
 function App() {
+  const [nextpage, setNextpage] = useState(false);
   return (
-    <div className="max-w-4xl mx-auto px-8 my-16 ">
-      <h1>React.js Rich Text Lexical Example</h1>
-      <div className="editor-shell">
-        <LexicalComposer initialConfig={editorConfig}>
-          <div className="editor-container ">
-            <ToolbarPlugin />
-            <div className="editor-inner">
-              <RichTextPlugin
-                contentEditable={
-                  <ContentEditable
-                    className="editor-input"
-                    aria-placeholder={placeholder}
-                    placeholder={
-                      <div className="editor-placeholder">{placeholder}</div>
+    <>
+      {nextpage ? (
+        <CreateQP />
+      ) : (
+        <div className="max-w-4xl mx-auto px-8 my-16 ">
+          <h1>React.js Rich Text Lexical Example</h1>
+          <div className="editor-shell">
+            <LexicalComposer initialConfig={editorConfig}>
+              <div className="editor-container ">
+                <ToolbarPlugin />
+                <div className="editor-inner">
+                  <RichTextPlugin
+                    contentEditable={
+                      <ContentEditable
+                        className="editor-input"
+                        aria-placeholder={placeholder}
+                        placeholder={
+                          <div className="editor-placeholder">
+                            {placeholder}
+                          </div>
+                        }
+                      />
                     }
+                    ErrorBoundary={LexicalErrorBoundary}
                   />
-                }
-                ErrorBoundary={LexicalErrorBoundary}
-              />
-              <HistoryPlugin />
-              <AutoFocusPlugin />
-              <ListPlugin />
-              <ImagesPlugin />
-              <EquationsPlugin />
-            </div>
+                  <HistoryPlugin />
+                  <AutoFocusPlugin />
+                  <ListPlugin />
+                  <ImagesPlugin />
+                  <EquationsPlugin />
+                </div>
+              </div>
+              <SubmitButton />
+              <SubmitButton
+                variant="next"
+                onClick={() => {
+                  setNextpage(true);
+                }}
+              >
+                Next
+              </SubmitButton>
+            </LexicalComposer>
           </div>
-          <SubmitButton />
-        </LexicalComposer>
-      </div>
-    </div>
+        </div>
+      )}
+    </>
   );
 }
 

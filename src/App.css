@@ -1,1 +1,15 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-primary-gray-light: #eff0f5;
+  --color-secondary-blue: #263eac;
+  --color-ternary-gray-dark: #8c8c8c;
+  --color-secondary-black: #0e2023;
+  --color-ternary-green: #1fb67c;
+}
+
+@theme {
+  --radius-custom-30: 1.875rem;
+}
