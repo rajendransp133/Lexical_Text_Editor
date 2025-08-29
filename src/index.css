@@ -630,6 +630,7 @@ pre::-webkit-scrollbar-thumb {
   vertical-align: middle;
   -webkit-appearance: none;
   -moz-appearance: none;
+  appearance: none;
   width: 70px;
   font-size: 14px;
   color: #777;
@@ -1007,7 +1008,8 @@ i.superscript {
   background-image: url(/icons/type-superscript.svg);
 }
 
-.editor-shell .editor-image .image-resizer {
+.editor-shell .editor-image .image-resizer,
+.image-resizer {
   display: block;
   width: 7px;
   height: 7px;
@@ -1017,49 +1019,57 @@ i.superscript {
   z-index: 10;
 }
 
-.editor-shell .editor-image .image-resizer.image-resizer-n {
+.editor-shell .editor-image .image-resizer.image-resizer-n,
+.image-resizer.image-resizer-n {
   top: -6px;
   left: calc(50% - 3.5px);
   cursor: n-resize;
 }
 
-.editor-shell .editor-image .image-resizer.image-resizer-ne {
+.editor-shell .editor-image .image-resizer.image-resizer-ne,
+.image-resizer.image-resizer-ne {
   top: -6px;
   right: -6px;
   cursor: ne-resize;
 }
 
-.editor-shell .editor-image .image-resizer.image-resizer-e {
+.editor-shell .editor-image .image-resizer.image-resizer-e,
+.image-resizer.image-resizer-e {
   top: calc(50% - 3.5px);
   right: -6px;
   cursor: e-resize;
 }
 
-.editor-shell .editor-image .image-resizer.image-resizer-se {
+.editor-shell .editor-image .image-resizer.image-resizer-se,
+.image-resizer.image-resizer-se {
   bottom: -6px;
   right: -6px;
   cursor: nwse-resize;
 }
 
-.editor-shell .editor-image .image-resizer.image-resizer-s {
+.editor-shell .editor-image .image-resizer.image-resizer-s,
+.image-resizer.image-resizer-s {
   bottom: -6px;
   left: calc(50% - 3.5px);
   cursor: s-resize;
 }
 
-.editor-shell .editor-image .image-resizer.image-resizer-sw {
+.editor-shell .editor-image .image-resizer.image-resizer-sw,
+.image-resizer.image-resizer-sw {
   bottom: -6px;
   left: -6px;
   cursor: sw-resize;
 }
 
-.editor-shell .editor-image .image-resizer.image-resizer-w {
+.editor-shell .editor-image .image-resizer.image-resizer-w,
+.image-resizer.image-resizer-w {
   top: calc(50% - 3.5px);
   left: -6px;
   cursor: w-resize;
 }
 
-.editor-shell .editor-image .image-resizer.image-resizer-nw {
+.editor-shell .editor-image .image-resizer.image-resizer-nw,
+.image-resizer.image-resizer-nw {
   top: -6px;
   left: -6px;
   cursor: nw-resize;

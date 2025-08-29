@@ -386,37 +386,44 @@ export default function ImageComponent({
   const isFocused = (isSelected || isResizing) && isEditable;
   return (
     <Suspense fallback={null}>
-      <div style={{ position: "relative", display: "inline-block" }}>
-        <div draggable={draggable}>
-          {isLoadError ? (
-            <BrokenImage />
-          ) : (
-            <LazyImage
-              className={
-                isFocused
-                  ? `focused ${$isNodeSelection(selection) ? "draggable" : ""}`
-                  : null
-              }
-              src={src}
-              altText={altText}
+      <div className="editor-shell">
+        <div
+          className="editor-image"
+          style={{ position: "relative", display: "inline-block" }}
+        >
+          <div draggable={draggable}>
+            {isLoadError ? (
+              <BrokenImage />
+            ) : (
+              <LazyImage
+                className={
+                  isFocused
+                    ? `focused ${
+                        $isNodeSelection(selection) ? "draggable" : ""
+                      }`
+                    : null
+                }
+                src={src}
+                altText={altText}
+                imageRef={imageRef}
+                width={width}
+                height={height}
+                maxWidth={maxWidth}
+                onError={() => setIsLoadError(true)}
+              />
+            )}
+          </div>
+
+          {resizable && $isNodeSelection(selection) && isFocused && (
+            <ImageResizer
+              editor={editor}
               imageRef={imageRef}
-              width={width}
-              height={height}
               maxWidth={maxWidth}
-              onError={() => setIsLoadError(true)}
+              onResizeStart={onResizeStart}
+              onResizeEnd={onResizeEnd}
             />
           )}
         </div>
-
-        {resizable && $isNodeSelection(selection) && isFocused && (
-          <ImageResizer
-            editor={editor}
-            imageRef={imageRef}
-            maxWidth={maxWidth}
-            onResizeStart={onResizeStart}
-            onResizeEnd={onResizeEnd}
-          />
-        )}
       </div>
     </Suspense>
   );
