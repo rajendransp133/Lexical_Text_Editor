@@ -4,6 +4,7 @@ import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $isTextNode,
   type DOMConversionMap,
@@ -15,7 +16,10 @@ import {
   type LexicalNode,
   ParagraphNode,
   TextNode,
+  $getRoot,
 } from "lexical";
+// Note: You may need to install @lexical/html with: npm install @lexical/html
+// import { $generateHtmlFromNodes } from "@lexical/html";
 
 import ExampleTheme from "./ExampleTheme";
 import ToolbarPlugin from "./Plugins/ToolbarPlugin";
@@ -31,6 +35,62 @@ import { EquationNode } from "./nodes/EquationNode";
 import EquationsPlugin from "./Plugins/EquationPlugin";
 
 const placeholder = "Enter some rich text...";
+
+// Submit handler component to access editor context
+function SubmitButton() {
+  const [editor] = useLexicalComposerContext();
+
+  const handleSubmit = () => {
+    editor.read(() => {
+      // Get the root node
+      const root = $getRoot();
+
+      // Get the editor state as JSON
+      const editorState = editor.getEditorState();
+      const json = editorState.toJSON();
+
+      // Get plain text content
+      const plainText = root.getTextContent();
+
+      // Try to get HTML representation (basic approach without @lexical/html)
+      let htmlContent = "";
+      try {
+        // Get the root element of the editor
+        const rootElement = editor.getRootElement();
+        if (rootElement) {
+          htmlContent = rootElement.innerHTML;
+        }
+      } catch (error) {
+        console.warn("Could not extract HTML content:", error);
+      }
+
+      // Log different formats of the content
+      console.group("🚀 Rich Text Editor Content:");
+      console.log("📝 Plain text:", plainText);
+      console.log("🌐 HTML content:", htmlContent);
+      console.log("📋 JSON representation:", json);
+      console.log("📄 Serialized JSON:", JSON.stringify(json, null, 2));
+      console.groupEnd();
+
+      // Also show alert for immediate feedback
+      alert(
+        `Content submitted! Check console for details.\n\nPlain text: ${plainText.slice(
+          0,
+          100
+        )}${plainText.length > 100 ? "..." : ""}`
+      );
+    });
+  };
+
+  return (
+    <button
+      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md mt-4 transition-colors"
+      onClick={handleSubmit}
+    >
+      Submit
+    </button>
+  );
+}
 
 const removeStylesExportDOM = (
   editor: LexicalEditor,
@@ -149,7 +209,7 @@ const editorConfig = {
 
 function App() {
   return (
-    <div className="max-w-3xl mx-auto px-8 my-16 ">
+    <div className="max-w-4xl mx-auto px-8 my-16 ">
       <h1>React.js Rich Text Lexical Example</h1>
       <div className="editor-shell">
         <LexicalComposer initialConfig={editorConfig}>
@@ -175,6 +235,7 @@ function App() {
               <EquationsPlugin />
             </div>
           </div>
+          <SubmitButton />
         </LexicalComposer>
       </div>
     </div>

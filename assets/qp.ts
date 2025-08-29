@@ -1,0 +1,812 @@
+import type { JEEStructure } from "../src/create-qp-page/types_qp";
+
+export const qp: JEEStructure = {
+  id: "JEE2025",
+  name: "Joint Entrance Examination (Main) - 2025",
+  total_marks: 300,
+  duration: 180,
+  section: [
+    {
+      name: "Physics",
+      totalmarks: 100,
+      totalquestion: 30,
+      weightage: [
+        {
+          type: "mcq",
+          count: 20,
+          marks: 4,
+          positive: 4,
+          negative: -1,
+          questions: [
+            {
+              id: "P1",
+              type: "mcq",
+              question:
+                "A particle moves in a straight line with constant acceleration. If it covers 40 m in the 4th second and 44 m in the 6th second, find its initial velocity.",
+              options: ["10 m/s", "12 m/s", "14 m/s", "16 m/s"],
+              answer: 2,
+            },
+            {
+              id: "P2",
+              type: "mcq",
+              question:
+                "The electric field at a distance r from an infinite line charge having linear charge density λ is:",
+              options: ["λ/(2πε₀r)", "λ/(4πε₀r)", "λ/(πε₀r)", "2λ/(πε₀r)"],
+              answer: 0,
+            },
+            {
+              id: "P3",
+              type: "mcq",
+              question:
+                "A spring-mass system has a period of 2s. If the mass is increased by 3 kg, the period becomes 2√2 s. The original mass is:",
+              options: ["1 kg", "2 kg", "3 kg", "4 kg"],
+              answer: 2,
+            },
+            {
+              id: "P4",
+              type: "mcq",
+              question:
+                "The ratio of kinetic energies of two particles of masses m₁ and m₂ having same momentum is:",
+              options: ["m₁ : m₂", "m₂ : m₁", "√(m₁) : √(m₂)", "m₁² : m₂²"],
+              answer: 1,
+            },
+            {
+              id: "P5",
+              type: "mcq",
+              question:
+                "In Young's double slit experiment, the distance between slits is 1 mm and screen is at 1 m. If wavelength of light is 500 nm, the fringe width is:",
+              options: ["0.5 mm", "1.0 mm", "1.5 mm", "2.0 mm"],
+              answer: 0,
+            },
+            {
+              id: "P6",
+              type: "mcq",
+              question:
+                "A conducting sphere of radius R carries charge Q. The electric field just outside the surface is:",
+              options: ["Q/(4πε₀R)", "Q/(4πε₀R²)", "Q/(2πε₀R²)", "Q/(8πε₀R²)"],
+              answer: 1,
+            },
+            {
+              id: "P7",
+              type: "mcq",
+              question:
+                "The de Broglie wavelength of an electron accelerated through a potential difference of 100 V is approximately:",
+              options: ["0.12 nm", "0.24 nm", "1.2 nm", "2.4 nm"],
+              answer: 0,
+            },
+            {
+              id: "P8",
+              type: "mcq",
+              question:
+                "Two identical charges are separated by distance d. If the distance is doubled, the electrostatic potential energy becomes:",
+              options: ["Four times", "Half", "Double", "One-fourth"],
+              answer: 1,
+            },
+            {
+              id: "P9",
+              type: "mcq",
+              question:
+                "The magnetic field at the center of a circular coil of radius r carrying current I is:",
+              options: ["μ₀I/(2r)", "μ₀I/(4r)", "μ₀I/r", "2μ₀I/r"],
+              answer: 0,
+            },
+            {
+              id: "P10",
+              type: "mcq",
+              question:
+                "A projectile is fired at an angle of 30° with horizontal with velocity 20 m/s. Its time of flight is: (g = 10 m/s²)",
+              options: ["1 s", "2 s", "3 s", "4 s"],
+              answer: 1,
+            },
+            {
+              id: "P11",
+              type: "mcq",
+              question:
+                "The power dissipated in a resistor R when connected to a voltage source V is P. If the voltage is doubled, the power becomes:",
+              options: ["P", "2P", "4P", "P/4"],
+              answer: 2,
+            },
+            {
+              id: "P12",
+              type: "mcq",
+              question:
+                "The energy stored in a capacitor of capacitance C charged to potential V is:",
+              options: ["CV", "CV²", "½CV²", "2CV²"],
+              answer: 2,
+            },
+            {
+              id: "P13",
+              type: "mcq",
+              question:
+                "A gas undergoes an adiabatic process. The relation between pressure P and volume V is:",
+              options: [
+                "PV = constant",
+                "PVᵞ = constant",
+                "P/V = constant",
+                "PV² = constant",
+              ],
+              answer: 1,
+            },
+            {
+              id: "P14",
+              type: "mcq",
+              question:
+                "The wavelength of sound in air is 1 m. If the speed of sound is 340 m/s, the frequency is:",
+              options: ["340 Hz", "170 Hz", "680 Hz", "34 Hz"],
+              answer: 0,
+            },
+            {
+              id: "P15",
+              type: "mcq",
+              question:
+                "The escape velocity from Earth's surface is approximately:",
+              options: ["7.9 km/s", "11.2 km/s", "15.0 km/s", "25.0 km/s"],
+              answer: 1,
+            },
+            {
+              id: "P16",
+              type: "mcq",
+              question:
+                "In a photoelectric effect experiment, the threshold frequency is ν₀. If light of frequency 2ν₀ is incident, the maximum kinetic energy of photoelectrons is:",
+              options: ["hν₀", "2hν₀", "hν₀/2", "3hν₀/2"],
+              answer: 0,
+            },
+            {
+              id: "P17",
+              type: "mcq",
+              question:
+                "A wire of resistance R is stretched to double its length. Its new resistance becomes:",
+              options: ["R/2", "2R", "4R", "R/4"],
+              answer: 2,
+            },
+            {
+              id: "P18",
+              type: "mcq",
+              question: "The momentum of a photon of wavelength λ is:",
+              options: ["hλ", "h/λ", "λ/h", "hc/λ"],
+              answer: 1,
+            },
+            {
+              id: "P19",
+              type: "mcq",
+              question:
+                "Two resistors of 6Ω and 12Ω are connected in parallel. The equivalent resistance is:",
+              options: ["18Ω", "4Ω", "9Ω", "6Ω"],
+              answer: 1,
+            },
+            {
+              id: "P20",
+              type: "mcq",
+              question:
+                "The work function of a metal is 2.5 eV. The threshold wavelength is approximately:",
+              options: ["500 nm", "600 nm", "700 nm", "800 nm"],
+              answer: 0,
+            },
+          ],
+        },
+        {
+          type: "nat",
+          count: 10,
+          attempt: 5,
+          marks: 4,
+          positive: 4,
+          negative: 0,
+          questions: [
+            {
+              id: "P21",
+              type: "nat",
+              question:
+                "A car accelerates from rest at 2 m/s² for 10 seconds. Find the distance covered in meters.",
+              start: 90,
+              end: 110,
+              precision: 0,
+            },
+            {
+              id: "P22",
+              type: "nat",
+              question:
+                "A parallel plate capacitor has plates separated by 2 mm with area 0.01 m². If ε₀ = 8.85 × 10⁻¹² F/m, find the capacitance in pF.",
+              start: 40,
+              end: 50,
+              precision: 0,
+            },
+            {
+              id: "P23",
+              type: "nat",
+              question:
+                "A simple pendulum has length 1 m. Find its period in seconds. (g = 10 m/s², π = 3.14)",
+              start: 1.5,
+              end: 2.5,
+              precision: 1,
+            },
+            {
+              id: "P24",
+              type: "nat",
+              question:
+                "A 2 kg mass is attached to a spring of spring constant 200 N/m. Find the frequency of oscillation in Hz. (π = 3.14)",
+              start: 0.5,
+              end: 1.5,
+              precision: 1,
+            },
+            {
+              id: "P25",
+              type: "nat",
+              question:
+                "In a hydrogen atom, the electron transitions from n=3 to n=2 level. If the energy of ground state is -13.6 eV, find the energy of emitted photon in eV.",
+              start: 1.5,
+              end: 2.5,
+              precision: 1,
+            },
+            {
+              id: "P26",
+              type: "nat",
+              question:
+                "A uniform rod of length 2 m and mass 4 kg is pivoted at its center. Find the moment of inertia about the pivot in kg⋅m².",
+              start: 0.5,
+              end: 1.5,
+              precision: 1,
+            },
+            {
+              id: "P27",
+              type: "nat",
+              question:
+                "Two charges +2μC and -3μC are separated by 30 cm. Find the electric field at the midpoint in N/C. (k = 9 × 10⁹ Nm²/C²)",
+              start: 1800000,
+              end: 2200000,
+              precision: 0,
+            },
+            {
+              id: "P28",
+              type: "nat",
+              question:
+                "A convex lens has focal length 20 cm. An object is placed at 30 cm. Find the image distance in cm.",
+              start: 55,
+              end: 65,
+              precision: 0,
+            },
+            {
+              id: "P29",
+              type: "nat",
+              question:
+                "A 10 V battery is connected to a 5Ω resistor. Find the power dissipated in watts.",
+              start: 15,
+              end: 25,
+              precision: 0,
+            },
+            {
+              id: "P30",
+              type: "nat",
+              question:
+                "A particle moves in a circle of radius 2 m with speed 4 m/s. Find the centripetal acceleration in m/s².",
+              start: 6,
+              end: 10,
+              precision: 0,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "Chemistry",
+      totalmarks: 100,
+      totalquestion: 30,
+      weightage: [
+        {
+          type: "mcq",
+          count: 20,
+          marks: 4,
+          positive: 4,
+          negative: -2,
+          questions: [
+            {
+              id: "C1",
+              type: "mcq",
+              question: "The hybridization of carbon in methane (CH₄) is:",
+              options: ["sp", "sp²", "sp³", "sp³d"],
+              answer: 2,
+            },
+            {
+              id: "C2",
+              type: "mcq",
+              question: "Which of the following has the highest boiling point?",
+              options: ["H₂O", "H₂S", "H₂Se", "H₂Te"],
+              answer: 0,
+            },
+            {
+              id: "C3",
+              type: "mcq",
+              question:
+                "The number of moles of NaOH required to neutralize 1 mole of H₂SO₄ is:",
+              options: ["1", "2", "3", "4"],
+              answer: 1,
+            },
+            {
+              id: "C4",
+              type: "mcq",
+              question: "The pH of 0.01 M HCl solution is:",
+              options: ["1", "2", "3", "4"],
+              answer: 1,
+            },
+            {
+              id: "C5",
+              type: "mcq",
+              question: "Which of the following is an example of a Lewis acid?",
+              options: ["NH₃", "H₂O", "BF₃", "OH⁻"],
+              answer: 2,
+            },
+            {
+              id: "C6",
+              type: "mcq",
+              question: "The oxidation state of chromium in K₂Cr₂O₇ is:",
+              options: ["+3", "+4", "+5", "+6"],
+              answer: 3,
+            },
+            {
+              id: "C7",
+              type: "mcq",
+              question: "The molecular formula of benzene is:",
+              options: ["C₆H₆", "C₆H₁₂", "C₆H₁₄", "C₆H₁₀"],
+              answer: 0,
+            },
+            {
+              id: "C8",
+              type: "mcq",
+              question: "Which of the following is a primary alcohol?",
+              options: ["CH₃CH₂OH", "(CH₃)₂CHOH", "(CH₃)₃COH", "C₆H₅OH"],
+              answer: 0,
+            },
+            {
+              id: "C9",
+              type: "mcq",
+              question: "The IUPAC name of CH₃CH₂CH₂COOH is:",
+              options: [
+                "Propanoic acid",
+                "Butanoic acid",
+                "Pentanoic acid",
+                "Hexanoic acid",
+              ],
+              answer: 1,
+            },
+            {
+              id: "C10",
+              type: "mcq",
+              question: "The number of σ bonds in ethene (C₂H₄) is:",
+              options: ["4", "5", "6", "7"],
+              answer: 1,
+            },
+            {
+              id: "C11",
+              type: "mcq",
+              question:
+                "Which of the following has the lowest ionization energy?",
+              options: ["Li", "Na", "K", "Rb"],
+              answer: 3,
+            },
+            {
+              id: "C12",
+              type: "mcq",
+              question: "The geometry of NH₃ molecule is:",
+              options: [
+                "Linear",
+                "Trigonal planar",
+                "Pyramidal",
+                "Tetrahedral",
+              ],
+              answer: 2,
+            },
+            {
+              id: "C13",
+              type: "mcq",
+              question:
+                "The rate of reaction doubles when temperature increases from 27°C to 37°C. The activation energy is approximately:",
+              options: ["40 kJ/mol", "50 kJ/mol", "60 kJ/mol", "70 kJ/mol"],
+              answer: 1,
+            },
+            {
+              id: "C14",
+              type: "mcq",
+              question: "Which of the following is a biodegradable polymer?",
+              options: ["Polyethylene", "PVC", "Polystyrene", "PHB"],
+              answer: 3,
+            },
+            {
+              id: "C15",
+              type: "mcq",
+              question: "The coordination number of Ni in [Ni(CN)₄]²⁻ is:",
+              options: ["2", "4", "6", "8"],
+              answer: 1,
+            },
+            {
+              id: "C16",
+              type: "mcq",
+              question: "Which of the following is paramagnetic?",
+              options: ["N₂", "O₂", "F₂", "Ne₂"],
+              answer: 1,
+            },
+            {
+              id: "C17",
+              type: "mcq",
+              question: "The van't Hoff factor for NaCl in dilute solution is:",
+              options: ["1", "2", "3", "4"],
+              answer: 1,
+            },
+            {
+              id: "C18",
+              type: "mcq",
+              question: "Which of the following has maximum entropy?",
+              options: ["Ice", "Water", "Steam", "All same"],
+              answer: 2,
+            },
+            {
+              id: "C19",
+              type: "mcq",
+              question: "The brown ring test is used to detect:",
+              options: ["SO₄²⁻", "NO₃⁻", "Cl⁻", "Br⁻"],
+              answer: 1,
+            },
+            {
+              id: "C20",
+              type: "mcq",
+              question: "The monomer of natural rubber is:",
+              options: ["Styrene", "Ethylene", "Isoprene", "Vinyl chloride"],
+              answer: 2,
+            },
+          ],
+        },
+        {
+          type: "nat",
+          count: 10,
+          attempt: 5,
+          marks: 4,
+          positive: 4,
+          negative: 0,
+          questions: [
+            {
+              id: "C21",
+              type: "nat",
+              question:
+                "How many grams of NaCl are needed to prepare 500 mL of 0.2 M solution? (Molar mass of NaCl = 58.5 g/mol)",
+              start: 5,
+              end: 7,
+              precision: 0,
+            },
+            {
+              id: "C22",
+              type: "nat",
+              question: "The pH of 0.001 M HNO₃ solution is:",
+              start: 2.5,
+              end: 3.5,
+              precision: 1,
+            },
+            {
+              id: "C23",
+              type: "nat",
+              question: "How many electrons are present in 1 mole of H₂O?",
+              start: 8,
+              end: 12,
+              precision: 0,
+            },
+            {
+              id: "C24",
+              type: "nat",
+              question: "The number of structural isomers of C₄H₁₀ is:",
+              start: 1,
+              end: 3,
+              precision: 0,
+            },
+            {
+              id: "C25",
+              type: "nat",
+              question: "At STP, 11.2 L of CO₂ contains how many moles?",
+              start: 0.5,
+              end: 1.5,
+              precision: 1,
+            },
+            {
+              id: "C26",
+              type: "nat",
+              question: "The oxidation state of sulfur in H₂S₂O₈ is:",
+              start: 5,
+              end: 7,
+              precision: 0,
+            },
+            {
+              id: "C27",
+              type: "nat",
+              question: "How many π bonds are present in benzene?",
+              start: 2,
+              end: 4,
+              precision: 0,
+            },
+            {
+              id: "C28",
+              type: "nat",
+              question: "The molarity of pure water is approximately:",
+              start: 50,
+              end: 60,
+              precision: 0,
+            },
+            {
+              id: "C29",
+              type: "nat",
+              question: "The number of unpaired electrons in Fe³⁺ is:",
+              start: 4,
+              end: 6,
+              precision: 0,
+            },
+            {
+              id: "C30",
+              type: "nat",
+              question: "The coordination number of Cu in CuSO₄·5H₂O is:",
+              start: 5,
+              end: 7,
+              precision: 0,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "Mathematics",
+      totalmarks: 100,
+      totalquestion: 30,
+      weightage: [
+        {
+          type: "mcq",
+          count: 20,
+          marks: 4,
+          positive: 4,
+          negative: 0,
+          questions: [
+            {
+              id: "M1",
+              type: "mcq",
+              question: "If sin θ = 3/5, then cos θ is:",
+              options: ["4/5", "-4/5", "±4/5", "3/4"],
+              answer: 2,
+            },
+            {
+              id: "M2",
+              type: "mcq",
+              question: "The derivative of sin(x²) is:",
+              options: ["cos(x²)", "2x cos(x²)", "2x sin(x²)", "x cos(x²)"],
+              answer: 1,
+            },
+            {
+              id: "M3",
+              type: "mcq",
+              question: "The integral of 1/x dx is:",
+              options: ["log|x| + C", "x + C", "1/x² + C", "log x + C"],
+              answer: 0,
+            },
+            {
+              id: "M4",
+              type: "mcq",
+              question: "If A = {1, 2, 3} and B = {2, 3, 4}, then A ∩ B is:",
+              options: ["{1, 2, 3, 4}", "{2, 3}", "{1}", "{4}"],
+              answer: 1,
+            },
+            {
+              id: "M5",
+              type: "mcq",
+              question:
+                "The equation of the line passing through (1, 2) with slope 3 is:",
+              options: ["y = 3x - 1", "y = 3x + 2", "y = 3x - 5", "y = x + 3"],
+              answer: 0,
+            },
+            {
+              id: "M6",
+              type: "mcq",
+              question: "The value of ⁿC₀ + ⁿC₁ + ⁿC₂ + ... + ⁿCₙ is:",
+              options: ["n", "2ⁿ", "n!", "2ⁿ⁻¹"],
+              answer: 1,
+            },
+            {
+              id: "M7",
+              type: "mcq",
+              question:
+                "If the roots of x² - 5x + 6 = 0 are α and β, then α + β is:",
+              options: ["5", "-5", "6", "-6"],
+              answer: 0,
+            },
+            {
+              id: "M8",
+              type: "mcq",
+              question: "The distance between points (1, 2) and (4, 6) is:",
+              options: ["3", "4", "5", "7"],
+              answer: 2,
+            },
+            {
+              id: "M9",
+              type: "mcq",
+              question: "The value of log₂ 8 is:",
+              options: ["2", "3", "4", "8"],
+              answer: 1,
+            },
+            {
+              id: "M10",
+              type: "mcq",
+              question: "If f(x) = x² + 2x + 1, then f(-1) is:",
+              options: ["0", "1", "2", "4"],
+              answer: 0,
+            },
+            {
+              id: "M11",
+              type: "mcq",
+              question: "The sum of first n natural numbers is:",
+              options: ["n(n+1)", "n(n+1)/2", "n(n-1)/2", "n²"],
+              answer: 1,
+            },
+            {
+              id: "M12",
+              type: "mcq",
+              question:
+                "The area of a triangle with vertices (0,0), (3,0), and (0,4) is:",
+              options: ["6", "12", "7", "5"],
+              answer: 0,
+            },
+            {
+              id: "M13",
+              type: "mcq",
+              question: "If |z| = 5 and arg(z) = π/3, then z is:",
+              options: [
+                "5(cos π/3 + i sin π/3)",
+                "5(cos π/6 + i sin π/6)",
+                "5(cos 2π/3 + i sin 2π/3)",
+                "5(cos π/4 + i sin π/4)",
+              ],
+              answer: 0,
+            },
+            {
+              id: "M14",
+              type: "mcq",
+              question:
+                "The coefficient of x² in the expansion of (1 + x)⁵ is:",
+              options: ["5", "10", "15", "20"],
+              answer: 1,
+            },
+            {
+              id: "M15",
+              type: "mcq",
+              question: "The maximum value of sin x + cos x is:",
+              options: ["1", "√2", "2", "0"],
+              answer: 1,
+            },
+            {
+              id: "M16",
+              type: "mcq",
+              question: "If A is a 3×3 matrix with |A| = 5, then |2A| is:",
+              options: ["10", "40", "25", "8"],
+              answer: 1,
+            },
+            {
+              id: "M17",
+              type: "mcq",
+              question:
+                "The eccentricity of the hyperbola x²/16 - y²/9 = 1 is:",
+              options: ["5/4", "3/4", "4/5", "3/5"],
+              answer: 0,
+            },
+            {
+              id: "M18",
+              type: "mcq",
+              question:
+                "The probability of getting a head in a single toss of a fair coin is:",
+              options: ["0", "1/4", "1/2", "1"],
+              answer: 2,
+            },
+            {
+              id: "M19",
+              type: "mcq",
+              question: "The value of ∫₀¹ x dx is:",
+              options: ["0", "1/2", "1", "2"],
+              answer: 1,
+            },
+            {
+              id: "M20",
+              type: "mcq",
+              question:
+                "If vectors a⃗ and b⃗ are perpendicular, then a⃗ · b⃗ is:",
+              options: ["0", "1", "|a⃗||b⃗|", "-1"],
+              answer: 0,
+            },
+          ],
+        },
+        {
+          type: "nat",
+          count: 10,
+          attempt: 5,
+          marks: 4,
+          positive: 4,
+          negative: 0,
+          questions: [
+            {
+              id: "M21",
+              type: "nat",
+              question: "Find the value of 2³ + 3² - 4.",
+              start: 10,
+              end: 15,
+              precision: 0,
+            },
+            {
+              id: "M22",
+              type: "nat",
+              question: "If f(x) = x² + 3x + 2, find f(2).",
+              start: 10,
+              end: 15,
+              precision: 0,
+            },
+            {
+              id: "M23",
+              type: "nat",
+              question:
+                "The number of ways to arrange the letters of MATHEMATICS is 11!/2!2!. Find the value of 11!/2!2!.",
+              start: 4980000,
+              end: 4990000,
+              precision: 0,
+            },
+            {
+              id: "M24",
+              type: "nat",
+              question:
+                "Find the area of the circle with radius 3 units. (Take π = 3.14, answer in whole numbers)",
+              start: 25,
+              end: 30,
+              precision: 0,
+            },
+            {
+              id: "M25",
+              type: "nat",
+              question:
+                "If log₁₀ 2 = 0.301, find log₁₀ 8 (to 3 decimal places, answer as integer after multiplying by 1000).",
+              start: 900,
+              end: 910,
+              precision: 0,
+            },
+            {
+              id: "M26",
+              type: "nat",
+              question:
+                "Find the sum of the first 10 terms of the arithmetic progression 2, 5, 8, 11, ...",
+              start: 150,
+              end: 160,
+              precision: 0,
+            },
+            {
+              id: "M27",
+              type: "nat",
+              question: "If tan θ = 4/3, find sec θ.",
+              start: 4,
+              end: 6,
+              precision: 0,
+            },
+            {
+              id: "M28",
+              type: "nat",
+              question: "Find the number of diagonals in a regular hexagon.",
+              start: 8,
+              end: 10,
+              precision: 0,
+            },
+            {
+              id: "M29",
+              type: "nat",
+              question: "If the mean of 5 numbers is 20, find their sum.",
+              start: 95,
+              end: 105,
+              precision: 0,
+            },
+            {
+              id: "M30",
+              type: "nat",
+              question: "Find the value of ⁵C₂.",
+              start: 8,
+              end: 12,
+              precision: 0,
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
