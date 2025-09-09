@@ -76,7 +76,7 @@ export default function EquationsPlugin(): JSX.Element | null {
         // Position cursor after the equation
         if (inline) {
           // For inline equations, position cursor right after the equation node
-          equationNode.selectNext();
+          equationNode.selectNext(0, 0);
         } else {
           // For block equations, create a new paragraph after and position cursor there
           const newParagraph = $createParagraphNode();
@@ -85,7 +85,7 @@ export default function EquationsPlugin(): JSX.Element | null {
           } else {
             equationNode.insertAfter(newParagraph);
           }
-          newParagraph.select();
+          newParagraph.select(0, 0);
         }
 
         return true;

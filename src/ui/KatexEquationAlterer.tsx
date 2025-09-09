@@ -61,7 +61,7 @@ export default function KatexEquationAlterer({
         <ErrorBoundary onError={(e) => editor._onError(e)} fallback={null}>
           <KatexRenderer
             equation={equation}
-            inline={false}
+            inline={inline}
             onDoubleClick={() => null}
           />
         </ErrorBoundary>

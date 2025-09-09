@@ -1118,3 +1118,35 @@ i.superscript {
   left: -6px;
   cursor: nw-resize;
 }
+
+/* Equation styling */
+.editor-equation {
+  user-select: none;
+  display: inline-block;
+  position: relative;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Inline equations should flow with text */
+span.editor-equation {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 1px;
+}
+
+/* Block equations should be on their own line */
+div.editor-equation {
+  display: block;
+  margin: 0.5em 0;
+  text-align: center;
+}
+
+/* Katex styling overrides for better integration */
+.editor-equation .katex {
+  font-size: inherit;
+}
+
+.editor-equation .katex-display {
+  margin: 0;
+}
