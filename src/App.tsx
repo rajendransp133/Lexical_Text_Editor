@@ -279,6 +279,7 @@ function App() {
 
   const handleContentUpdate = (htmlContent: string) => {
     setShowboxContent(htmlContent);
+    console.log("📄 HTML content:", htmlContent);
   };
 
   return (

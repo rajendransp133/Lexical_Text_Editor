@@ -249,23 +249,9 @@ export default function ImageResizer({
       }}
     >
       <div
-        className="image-resizer image-resizer-n"
-        onPointerDown={(event) => {
-          handlePointerDown(event, Direction.north);
-        }}
-        style={{ pointerEvents: "auto" }}
-      />
-      <div
         className="image-resizer image-resizer-ne"
         onPointerDown={(event) => {
           handlePointerDown(event, Direction.north | Direction.east);
-        }}
-        style={{ pointerEvents: "auto" }}
-      />
-      <div
-        className="image-resizer image-resizer-e"
-        onPointerDown={(event) => {
-          handlePointerDown(event, Direction.east);
         }}
         style={{ pointerEvents: "auto" }}
       />
@@ -277,23 +263,9 @@ export default function ImageResizer({
         style={{ pointerEvents: "auto" }}
       />
       <div
-        className="image-resizer image-resizer-s"
-        onPointerDown={(event) => {
-          handlePointerDown(event, Direction.south);
-        }}
-        style={{ pointerEvents: "auto" }}
-      />
-      <div
         className="image-resizer image-resizer-sw"
         onPointerDown={(event) => {
           handlePointerDown(event, Direction.south | Direction.west);
-        }}
-        style={{ pointerEvents: "auto" }}
-      />
-      <div
-        className="image-resizer image-resizer-w"
-        onPointerDown={(event) => {
-          handlePointerDown(event, Direction.west);
         }}
         style={{ pointerEvents: "auto" }}
       />

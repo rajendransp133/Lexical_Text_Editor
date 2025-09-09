@@ -218,44 +218,66 @@ function $onDragStart(event: DragEvent): boolean {
 }
 
 function $onDragover(event: DragEvent): boolean {
-  const node = $getImageNodeInSelection();
-  if (!node) {
-    return false;
-  }
-  if (!canDropImage(event)) {
-    event.preventDefault();
-  }
-  return true;
-}
-
-function $onDrop(event: DragEvent, editor: LexicalEditor): boolean {
-  const node = $getImageNodeInSelection();
-  if (!node) {
-    return false;
-  }
+  // Check if we have image drag data
   const data = getDragImageData(event);
   if (!data) {
     return false;
   }
-  const existingLink = $findMatchingParent(
-    node,
-    (parent): parent is LinkNode =>
-      !$isAutoLinkNode(parent) && $isLinkNode(parent)
-  );
+
+  // Always prevent the default dragover behavior to enable dropping
   event.preventDefault();
-  if (canDropImage(event)) {
-    const range = getDragSelection(event);
-    node.remove();
+
+  // Only return false if we can't drop the image
+  if (!canDropImage(event)) {
+    return false;
+  }
+
+  return true;
+}
+
+function $onDrop(event: DragEvent, editor: LexicalEditor): boolean {
+  // Check if we have drag data for an image
+  const data = getDragImageData(event);
+  if (!data) {
+    return false;
+  }
+
+  event.preventDefault();
+
+  if (!canDropImage(event)) {
+    return false;
+  }
+
+  // Find the currently selected/dragged image node
+  const draggedNode = $getImageNodeInSelection();
+  let existingLink = null;
+
+  // If we have a dragged node, get its link parent and remove it
+  if (draggedNode) {
+    existingLink = $findMatchingParent(
+      draggedNode,
+      (parent): parent is LinkNode =>
+        !$isAutoLinkNode(parent) && $isLinkNode(parent)
+    );
+    draggedNode.remove();
+  }
+
+  // Get the drop position and set selection there
+  const range = getDragSelection(event);
+  if (range !== null && range !== undefined) {
     const rangeSelection = $createRangeSelection();
-    if (range !== null && range !== undefined) {
-      rangeSelection.applyDOMRange(range);
-    }
+    rangeSelection.applyDOMRange(range);
     $setSelection(rangeSelection);
+
+    // Insert the image at the new position
     editor.dispatchCommand(INSERT_IMAGE_COMMAND, data);
+
+    // Restore link if it existed
     if (existingLink) {
       editor.dispatchCommand(TOGGLE_LINK_COMMAND, existingLink.getURL());
     }
   }
+
   return true;
 }
 
@@ -291,24 +313,55 @@ declare global {
 
 function canDropImage(event: DragEvent): boolean {
   const target = event.target;
-  return !!(
-    isHTMLElement(target) &&
-    !target.closest("code, span.editor-image") &&
-    isHTMLElement(target.parentElement) &&
-    target.parentElement.closest("div.ContentEditable__root")
-  );
+  if (!isHTMLElement(target)) {
+    return false;
+  }
+
+  // Don't allow dropping on code blocks or on other images
+  if (target.closest("code, .editor-image")) {
+    return false;
+  }
+
+  // Check if we're within the editor content area
+  const editorInput = target.closest(".editor-input");
+  const editorContainer = target.closest(".editor-container, .editor-inner");
+
+  return !!(editorInput || editorContainer);
 }
 
 function getDragSelection(event: DragEvent): Range | null | undefined {
   let range;
   const domSelection = getDOMSelectionFromTarget(event.target);
+
+  // Try to get range from point first (most browsers)
   if (document.caretRangeFromPoint) {
     range = document.caretRangeFromPoint(event.clientX, event.clientY);
-  } else if (event.rangeParent && domSelection !== null) {
+  }
+  // Fallback for browsers that don't support caretRangeFromPoint
+  else if (domSelection && domSelection.rangeCount > 0) {
+    range = domSelection.getRangeAt(0);
+  }
+  // Another fallback using event properties
+  else if (event.rangeParent && domSelection !== null) {
     domSelection.collapse(event.rangeParent, event.rangeOffset || 0);
     range = domSelection.getRangeAt(0);
+  }
+  // Final fallback - create range at the drop target
+  else if (isHTMLElement(event.target)) {
+    range = document.createRange();
+    const target = event.target as HTMLElement;
+
+    // If target is a text node or has text content, try to place at appropriate position
+    if (target.firstChild && target.firstChild.nodeType === Node.TEXT_NODE) {
+      range.setStart(target.firstChild, 0);
+      range.setEnd(target.firstChild, 0);
+    } else {
+      range.selectNodeContents(target);
+      range.collapse(true);
+    }
   } else {
-    throw Error(`Cannot get the selection when dragging`);
+    console.warn("Cannot get selection when dragging");
+    return null;
   }
 
   return range;
