@@ -16,12 +16,9 @@ import {
   type LexicalNode,
   ParagraphNode,
   TextNode,
-  $getRoot,
 } from "lexical";
 
 import "./App.css";
-// Note: You may need to install @lexical/html with: npm install @lexical/html
-// import { $generateHtmlFromNodes } from "@lexical/html";
 
 import ExampleTheme from "./ExampleTheme";
 import ToolbarPlugin from "./Plugins/ToolbarPlugin";
@@ -36,20 +33,23 @@ import ImagesPlugin from "./Plugins/ImagePlugin";
 import { EquationNode } from "./nodes/EquationNode";
 import EquationsPlugin from "./Plugins/EquationPlugin";
 import CreateQP from "./create-qp-page/CreateQp";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type React from "react";
+import { $generateHtmlFromNodes, $generateNodesFromDOM } from "@lexical/html";
+import { $getRoot, $insertNodes } from "lexical";
 
 const placeholder = "Enter some rich text...";
 
-// Submit handler component to access editor context
 function SubmitButton({
   variant = "submit",
   onClick,
   children,
+  onContentUpdate,
 }: {
   variant?: "submit" | "next";
   onClick?: () => void;
   children?: React.ReactNode;
+  onContentUpdate?: (html: string) => void;
 }) {
   const [editor] = useLexicalComposerContext();
 
@@ -58,10 +58,13 @@ function SubmitButton({
       const editorState = editor.getEditorState();
       const json = editorState.toJSON();
 
-      console.group("🚀 Rich Text Editor Content:");
-      console.log("📋 JSON representation:", json);
       console.log("📄 Serialized JSON:", JSON.stringify(json, null, 2));
-      console.groupEnd();
+
+      // Generate HTML from the editor content
+      const htmlString = $generateHtmlFromNodes(editor, null);
+      if (onContentUpdate) {
+        onContentUpdate(htmlString);
+      }
     });
   };
 
@@ -99,8 +102,14 @@ const removeStylesExportDOM = (
       output.element,
       ...output.element.querySelectorAll("[style],[class]"),
     ]) {
+      // Preserve text-align style before removing all styles
+      const textAlign = (el as HTMLElement).style.textAlign;
       el.removeAttribute("class");
       el.removeAttribute("style");
+      // Restore text-align if it was present
+      if (textAlign) {
+        (el as HTMLElement).style.textAlign = textAlign;
+      }
     }
   }
   return output;
@@ -115,12 +124,12 @@ const exportMap: DOMExportOutputMap = new Map<
 ]);
 
 const getExtraStyles = (element: HTMLElement): string => {
-  // Parse styles from pasted input, but only if they match exactly the
-  // sort of styles that would be produced by exportDOM
   let extraStyles = "";
   const fontSize = parseAllowedFontSize(element.style.fontSize);
   const backgroundColor = parseAllowedColor(element.style.backgroundColor);
   const color = parseAllowedColor(element.style.color);
+  const textAlign = element.style.textAlign;
+
   if (fontSize !== "" && fontSize !== "15px") {
     extraStyles += `font-size: ${fontSize};`;
   }
@@ -129,6 +138,9 @@ const getExtraStyles = (element: HTMLElement): string => {
   }
   if (color !== "" && color !== "rgb(0, 0, 0)") {
     extraStyles += `color: ${color};`;
+  }
+  if (textAlign && textAlign !== "start" && textAlign !== "left") {
+    extraStyles += `text-align: ${textAlign};`;
   }
   return extraStyles;
 };
@@ -201,8 +213,74 @@ const editorConfig = {
   theme: ExampleTheme,
 };
 
+const showboxConfig = {
+  ...editorConfig,
+  namespace: "React.js Demo - Showbox",
+  editable: false,
+};
+
+function ContentPopulatorPlugin({ content }: { content: string }) {
+  const [editor] = useLexicalComposerContext();
+
+  useEffect(() => {
+    if (content) {
+      editor.update(() => {
+        const parser = new DOMParser();
+        const dom = parser.parseFromString(content, "text/html");
+        const nodes = $generateNodesFromDOM(editor, dom);
+
+        const root = $getRoot();
+        root.clear();
+        $insertNodes(nodes);
+      });
+    }
+  }, [content, editor]);
+
+  return null;
+}
+
+// ShowboxComposer component - read-only display
+function ShowboxComposer({ content }: { content: string }) {
+  const showboxPlaceholder = "Content will appear here after submission...";
+
+  return (
+    <div className="editor-shell mt-8">
+      <div className="mb-2">
+        <h3 className="text-lg font-semibold text-gray-700">Preview:</h3>
+      </div>
+      <LexicalComposer initialConfig={showboxConfig}>
+        <div className="editor-container opacity-80">
+          <div className="editor-inner bg-gray-50">
+            <RichTextPlugin
+              contentEditable={
+                <ContentEditable
+                  className="editor-input cursor-default pointer-events-none"
+                  aria-placeholder={showboxPlaceholder}
+                  placeholder={
+                    <div className="editor-placeholder">
+                      {showboxPlaceholder}
+                    </div>
+                  }
+                />
+              }
+              ErrorBoundary={LexicalErrorBoundary}
+            />
+            <ContentPopulatorPlugin content={content} />
+          </div>
+        </div>
+      </LexicalComposer>
+    </div>
+  );
+}
+
 function App() {
   const [nextpage, setNextpage] = useState(false);
+  const [showboxContent, setShowboxContent] = useState<string>("");
+
+  const handleContentUpdate = (htmlContent: string) => {
+    setShowboxContent(htmlContent);
+  };
+
   return (
     <>
       {nextpage ? (
@@ -236,7 +314,7 @@ function App() {
                   <EquationsPlugin />
                 </div>
               </div>
-              <SubmitButton />
+              <SubmitButton onContentUpdate={handleContentUpdate} />
               <SubmitButton
                 variant="next"
                 onClick={() => {
@@ -246,6 +324,7 @@ function App() {
                 Next
               </SubmitButton>
             </LexicalComposer>
+            <ShowboxComposer content={showboxContent} />
           </div>
         </div>
       )}

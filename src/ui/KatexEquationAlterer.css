@@ -18,11 +18,13 @@
 
 .KatexEquationAlterer_centerRow {
   display: flex;
-  flex-direction: "row";
+  flex-direction: row;
   margin-top: 10px;
   margin-bottom: 10px;
   justify-content: center;
   overflow: hidden;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .KatexEquationAlterer_textArea {
