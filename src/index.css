@@ -502,22 +502,58 @@ h1 {
 }
 
 .editor-heading-h1 {
-  font-size: 24px;
-  color: rgb(5, 5, 5);
-  font-weight: 400;
+  font-size: 32px;
+  color: #0e2023;
+  font-weight: 700;
   margin: 0;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  margin-top: 16px;
   padding: 0;
+  line-height: 1.2;
 }
 
 .editor-heading-h2 {
-  font-size: 15px;
-  color: rgb(101, 103, 107);
-  font-weight: 700;
+  font-size: 24px;
+  color: #0e2023;
+  font-weight: 600;
   margin: 0;
-  margin-top: 10px;
+  margin-bottom: 12px;
+  margin-top: 24px;
   padding: 0;
-  text-transform: uppercase;
+  line-height: 1.3;
+}
+
+.editor-heading-h3 {
+  font-size: 20px;
+  color: #0e2023;
+  font-weight: 600;
+  margin: 0;
+  margin-bottom: 10px;
+  margin-top: 20px;
+  padding: 0;
+  line-height: 1.4;
+}
+
+.editor-heading-h4 {
+  font-size: 18px;
+  color: #0e2023;
+  font-weight: 500;
+  margin: 0;
+  margin-bottom: 8px;
+  margin-top: 16px;
+  padding: 0;
+  line-height: 1.4;
+}
+
+.editor-heading-h5 {
+  font-size: 16px;
+  color: #0e2023;
+  font-weight: 500;
+  margin: 0;
+  margin-bottom: 6px;
+  margin-top: 12px;
+  padding: 0;
+  line-height: 1.5;
 }
 
 .editor-quote {
@@ -535,20 +571,28 @@ h1 {
   padding: 0;
   margin: 0;
   margin-left: 16px;
+  list-style-type: decimal;
+  color: #0e2023;
 }
 
 .editor-list-ul {
   padding: 0;
   margin: 0;
   margin-left: 16px;
+  list-style-type: disc;
+  color: #0e2023;
 }
 
 .editor-listitem {
   margin: 8px 32px 8px 32px;
+  display: list-item;
+  color: #0e2023;
 }
 
 .editor-nested-listitem {
-  list-style-type: none;
+  list-style-type: inherit;
+  display: list-item;
+  color: #0e2023;
 }
 
 pre::-webkit-scrollbar {

@@ -35,7 +35,7 @@ import { ImageNode } from "./nodes/ImageNode";
 import ImagesPlugin from "./Plugins/ImagePlugin";
 import { EquationNode } from "./nodes/EquationNode";
 import EquationsPlugin from "./Plugins/EquationPlugin";
-import CreateQP from "./create-qp-page/createQP";
+import CreateQP from "./create-qp-page/CreateQp";
 import { useState } from "react";
 import type React from "react";
 
@@ -55,43 +55,13 @@ function SubmitButton({
 
   const handleSubmit = () => {
     editor.read(() => {
-      // Get the root node
-      const root = $getRoot();
-
-      // Get the editor state as JSON
       const editorState = editor.getEditorState();
       const json = editorState.toJSON();
 
-      // Get plain text content
-      const plainText = root.getTextContent();
-
-      // Try to get HTML representation (basic approach without @lexical/html)
-      let htmlContent = "";
-      try {
-        // Get the root element of the editor
-        const rootElement = editor.getRootElement();
-        if (rootElement) {
-          htmlContent = rootElement.innerHTML;
-        }
-      } catch (error) {
-        console.warn("Could not extract HTML content:", error);
-      }
-
-      // Log different formats of the content
       console.group("🚀 Rich Text Editor Content:");
-      console.log("📝 Plain text:", plainText);
-      console.log("🌐 HTML content:", htmlContent);
       console.log("📋 JSON representation:", json);
       console.log("📄 Serialized JSON:", JSON.stringify(json, null, 2));
       console.groupEnd();
-
-      // Also show alert for immediate feedback
-      alert(
-        `Content submitted! Check console for details.\n\nPlain text: ${plainText.slice(
-          0,
-          100
-        )}${plainText.length > 100 ? "..." : ""}`
-      );
     });
   };
 
