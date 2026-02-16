@@ -538,7 +538,7 @@ function CreateQpPage() {
           <section>
             {currentQuestion.type === "mcq" && (
               <div className="grid grid-cols-2 gap-10.5 text-2xl font-normal text-[#0E2023]">
-                {newQuestionOptions.map((option, index) => (
+                {newQuestionOptions.map((_, index) => (
                   <div key={index} className="flex items-center gap-4">
                     <div className="flex w-full items-center gap-4 border-b border-[#8C8C8C] py-2.5">
                       <input
@@ -562,7 +562,7 @@ function CreateQpPage() {
             )}
             {currentQuestion.type === "msq" && (
               <div className="grid grid-cols-2 gap-10.5 text-2xl font-normal text-[#0E2023]">
-                {newQuestionOptions.map((option, index) => (
+                {newQuestionOptions.map((_, index) => (
                   <div key={index} className="flex items-center gap-4">
                     <div className="flex w-full items-center gap-4 border-b border-[#8C8C8C] py-2.5">
                       <input

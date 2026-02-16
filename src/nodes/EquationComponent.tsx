@@ -66,7 +66,7 @@ export default function EquationComponent({
       return mergeRegister(
         editor.registerCommand(
           SELECTION_CHANGE_COMMAND,
-          (payload) => {
+          () => {
             const activeElement = document.activeElement;
             const inputElem = inputRef.current;
             if (inputElem !== activeElement) {
@@ -78,7 +78,7 @@ export default function EquationComponent({
         ),
         editor.registerCommand(
           KEY_ESCAPE_COMMAND,
-          (payload) => {
+          () => {
             const activeElement = document.activeElement;
             const inputElem = inputRef.current;
             if (inputElem === activeElement) {
